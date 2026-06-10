@@ -9,14 +9,12 @@ COMPOSE_DIR="/opt/docker/kbeauty"
 CONTAINER="kbeauty_web"
 
 echo "→ Pulling latest from GitHub..."
-cd "$SITE_DIR"
-sudo git pull origin main
+sudo git -C "$SITE_DIR" pull origin main
 
 echo "→ Fixing file permissions..."
 sudo chmod -R a+rX "$SITE_DIR"
 
 echo "→ Restarting container..."
-cd "$COMPOSE_DIR"
-sudo docker compose restart "$CONTAINER"
+sudo docker compose -f "$COMPOSE_DIR/docker-compose.yml" restart "$CONTAINER"
 
 echo "✓ Deploy complete — https://k-beauty.academy"
