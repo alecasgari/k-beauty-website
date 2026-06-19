@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="AGF39 Forte — سایتوکاین تراپی تخصصی مو با ۷ فاکتور رشد برای درمان آلوپسی آندروژنیک">
   <title>AGF39 Forte | K-Beauty Academy</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=3">
   <link rel="icon" href="images/logo/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="images/logo/apple-touch-icon.png">
 </head>
@@ -23,9 +23,14 @@
       <nav class="main-nav" aria-label="منوی اصلی">
         <ul>
           <li><a href="index.html">خانه</a></li>
-          <li><a href="novanad.html">NovaNAD+</a></li>
-          <li><a href="pncell.html">PN CELL</a></li>
-          <li><a href="agf39.html">AGF39</a></li>
+          <li class="nav-dropdown">
+            <button type="button" class="nav-dropdown__toggle" aria-expanded="false" aria-haspopup="true">محصولات</button>
+            <ul class="nav-dropdown__menu" role="menu">
+              <li role="none"><a href="novanad.html" role="menuitem">NovaNAD+</a></li>
+              <li role="none"><a href="pncell.html" role="menuitem">PN CELL</a></li>
+              <li role="none"><a href="agf39.html" role="menuitem">AGF39</a></li>
+            </ul>
+          </li>
           <li><a href="academy.html">آکادمی</a></li>
           <li><a href="articles.html">مقالات علمی</a></li>
           <li><a href="verify.html">استعلام</a></li>
@@ -42,9 +47,14 @@
     <nav class="mobile-nav-panel" aria-label="منوی موبایل">
       <ul>
         <li><a href="index.html">خانه</a></li>
-        <li><a href="novanad.html">NovaNAD+</a></li>
-        <li><a href="pncell.html">PN CELL</a></li>
-        <li><a href="agf39.html">AGF39</a></li>
+        <li class="mobile-nav-group">
+          <button type="button" class="mobile-nav-group__toggle" aria-expanded="false">محصولات</button>
+          <ul class="mobile-nav-sub">
+            <li><a href="novanad.html">NovaNAD+</a></li>
+            <li><a href="pncell.html">PN CELL</a></li>
+            <li><a href="agf39.html">AGF39</a></li>
+          </ul>
+        </li>
         <li><a href="academy.html">آکادمی</a></li>
         <li><a href="articles.html">مقالات علمی</a></li>
         <li><a href="verify.html">استعلام گواهینامه</a></li>
@@ -203,6 +213,6 @@
     </div>
   </footer>
 
-  <script src="main.js?v=2"></script>
+  <script src="main.js?v=3"></script>
 </body>
 </html>

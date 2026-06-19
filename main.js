@@ -17,6 +17,7 @@
   function init() {
     initUtmCapture();
     initMobileMenu();
+    initNavDropdowns();
     initHeaderScroll();
     initActiveNav();
     initVerifyForm();
@@ -88,10 +89,53 @@
     });
   }
 
+  /* --- Nav Dropdowns --- */
+  function initNavDropdowns() {
+    document.querySelectorAll('.nav-dropdown__toggle').forEach(function (toggle) {
+      var dropdown = toggle.closest('.nav-dropdown');
+      if (!dropdown) return;
+
+      toggle.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var isOpen = dropdown.classList.contains('open');
+        document.querySelectorAll('.nav-dropdown.open').forEach(function (item) {
+          if (item !== dropdown) {
+            item.classList.remove('open');
+            var otherToggle = item.querySelector('.nav-dropdown__toggle');
+            if (otherToggle) otherToggle.setAttribute('aria-expanded', 'false');
+          }
+        });
+        dropdown.classList.toggle('open', !isOpen);
+        toggle.setAttribute('aria-expanded', !isOpen ? 'true' : 'false');
+      });
+    });
+
+    document.addEventListener('click', function () {
+      document.querySelectorAll('.nav-dropdown.open').forEach(function (dropdown) {
+        dropdown.classList.remove('open');
+        var toggle = dropdown.querySelector('.nav-dropdown__toggle');
+        if (toggle) toggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    document.querySelectorAll('.mobile-nav-group__toggle').forEach(function (toggle) {
+      toggle.addEventListener('click', function () {
+        var group = toggle.closest('.mobile-nav-group');
+        if (!group) return;
+        var isOpen = group.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    });
+  }
+
   /* --- Active Navigation Highlight --- */
   function initActiveNav() {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    const navLinks = document.querySelectorAll('.main-nav a, .mobile-nav a');
+    const productPages = ['novanad.html', 'pncell.html', 'agf39.html'];
+    const navLinks = document.querySelectorAll(
+      '.main-nav a, .mobile-nav a, .nav-dropdown__menu a, .mobile-nav-sub a'
+    );
 
     navLinks.forEach(function (link) {
       const href = link.getAttribute('href');
@@ -99,6 +143,19 @@
         link.classList.add('active');
       }
     });
+
+    if (productPages.indexOf(currentPage) !== -1) {
+      document.querySelectorAll('.nav-dropdown__toggle, .mobile-nav-group__toggle').forEach(function (el) {
+        el.classList.add('active');
+      });
+
+      var mobileGroup = document.querySelector('.mobile-nav-group');
+      if (mobileGroup) {
+        mobileGroup.classList.add('open');
+        var mobileToggle = mobileGroup.querySelector('.mobile-nav-group__toggle');
+        if (mobileToggle) mobileToggle.setAttribute('aria-expanded', 'true');
+      }
+    }
   }
 
   /* --- Certificate Verification --- */

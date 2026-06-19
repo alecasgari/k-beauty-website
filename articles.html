@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="مقالات علمی K-Beauty Academy — مرور تحقیقات NAD+، PDRN و AGF در پزشکی زیبایی و بیوتکنولوژی جوانسازی">
   <title>مقالات علمی | K-Beauty Academy</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=3">
   <link rel="icon" href="images/logo/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="images/logo/apple-touch-icon.png">
 </head>
-<body>
+<body class="articles-page">
 
   <header class="site-header">
     <div class="container header-inner">
@@ -23,9 +23,14 @@
       <nav class="main-nav" aria-label="منوی اصلی">
         <ul>
           <li><a href="index.html">خانه</a></li>
-          <li><a href="novanad.html">NovaNAD+</a></li>
-          <li><a href="pncell.html">PN CELL</a></li>
-          <li><a href="agf39.html">AGF39</a></li>
+          <li class="nav-dropdown">
+            <button type="button" class="nav-dropdown__toggle" aria-expanded="false" aria-haspopup="true">محصولات</button>
+            <ul class="nav-dropdown__menu" role="menu">
+              <li role="none"><a href="novanad.html" role="menuitem">NovaNAD+</a></li>
+              <li role="none"><a href="pncell.html" role="menuitem">PN CELL</a></li>
+              <li role="none"><a href="agf39.html" role="menuitem">AGF39</a></li>
+            </ul>
+          </li>
           <li><a href="academy.html">آکادمی</a></li>
           <li><a href="articles.html">مقالات علمی</a></li>
           <li><a href="verify.html">استعلام</a></li>
@@ -42,9 +47,14 @@
     <nav class="mobile-nav-panel" aria-label="منوی موبایل">
       <ul>
         <li><a href="index.html">خانه</a></li>
-        <li><a href="novanad.html">NovaNAD+</a></li>
-        <li><a href="pncell.html">PN CELL</a></li>
-        <li><a href="agf39.html">AGF39</a></li>
+        <li class="mobile-nav-group">
+          <button type="button" class="mobile-nav-group__toggle" aria-expanded="false">محصولات</button>
+          <ul class="mobile-nav-sub">
+            <li><a href="novanad.html">NovaNAD+</a></li>
+            <li><a href="pncell.html">PN CELL</a></li>
+            <li><a href="agf39.html">AGF39</a></li>
+          </ul>
+        </li>
         <li><a href="academy.html">آکادمی</a></li>
         <li><a href="articles.html">مقالات علمی</a></li>
         <li><a href="verify.html">استعلام گواهینامه</a></li>
@@ -91,6 +101,7 @@
           </aside>
 
           <div class="articles-main">
+            <div id="articles-active-filters" class="articles-active-filters" hidden aria-live="polite"></div>
             <div id="articles-grid" class="articles-grid" aria-live="polite"></div>
             <p id="articles-empty" class="articles-empty" hidden>مقاله‌ای یافت نشد.</p>
           </div>
@@ -98,6 +109,49 @@
       </div>
     </section>
   </main>
+
+  <button type="button" class="articles-fab" id="articles-fab" aria-expanded="false" aria-controls="articles-sheet">
+    <span class="articles-fab__icon" aria-hidden="true">⌕</span>
+    <span class="articles-fab__text">فیلتر و جستجو</span>
+    <span class="articles-fab__badge" id="articles-fab-badge" hidden>۰</span>
+  </button>
+
+  <div class="articles-sheet" id="articles-sheet" aria-hidden="true">
+    <div class="articles-sheet__backdrop" data-sheet-close></div>
+    <div class="articles-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="articles-sheet-title">
+      <div class="articles-sheet__header">
+        <h2 id="articles-sheet-title">جستجو و فیلتر</h2>
+        <button type="button" class="articles-sheet__close" data-sheet-close aria-label="بستن">×</button>
+      </div>
+      <div class="articles-sheet__body">
+        <div class="articles-sidebar__block">
+          <label for="articles-search-mobile" class="articles-sidebar__label">جستجو</label>
+          <input
+            type="search"
+            id="articles-search-mobile"
+            class="articles-search-input"
+            placeholder="عنوان مقاله..."
+            autocomplete="off"
+          >
+          <p class="articles-sidebar__hint">جستجو در عنوان فارسی و انگلیسی</p>
+        </div>
+        <div class="articles-sidebar__block">
+          <h3 class="articles-sidebar__label">دسته‌بندی</h3>
+          <div class="articles-filters articles-filters--sheet" role="group" aria-label="فیلتر دسته‌بندی موبایل">
+            <button type="button" class="articles-filter" data-article-filter-mobile="all">همه</button>
+            <button type="button" class="articles-filter" data-article-filter-mobile="nad">NAD+</button>
+            <button type="button" class="articles-filter" data-article-filter-mobile="pdrn">PDRN</button>
+            <button type="button" class="articles-filter" data-article-filter-mobile="agf">AGF</button>
+            <button type="button" class="articles-filter" data-article-filter-mobile="other">سایر</button>
+          </div>
+        </div>
+      </div>
+      <div class="articles-sheet__footer">
+        <button type="button" class="btn btn--ghost btn--full-mobile" id="articles-filter-reset">پاک کردن</button>
+        <button type="button" class="btn btn--primary btn--full-mobile" id="articles-filter-apply">اعمال فیلتر</button>
+      </div>
+    </div>
+  </div>
 
   <footer class="site-footer">
     <div class="container">
@@ -143,7 +197,7 @@
     </div>
   </footer>
 
-  <script src="main.js?v=2"></script>
-  <script src="articles.js?v=2"></script>
+  <script src="main.js?v=3"></script>
+  <script src="articles.js?v=5"></script>
 </body>
 </html>

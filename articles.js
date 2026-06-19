@@ -65,44 +65,218 @@
   /* --- Articles Listing --- */
   function initArticlesList() {
     var grid = document.getElementById('articles-grid');
-    var searchInput = document.getElementById('articles-search');
-    var filterBtns = document.querySelectorAll('[data-article-filter]');
     var emptyEl = document.getElementById('articles-empty');
+    var searchDesktop = document.getElementById('articles-search');
+    var filterDesktopBtns = document.querySelectorAll('[data-article-filter]');
+    var listState = {
+      data: null,
+      grid: grid,
+      emptyEl: emptyEl
+    };
 
     loadArticlesData()
-        .then(function (data) {
-          var countEl = document.getElementById('articles-count');
-          if (countEl) {
-            countEl.textContent = data.articles.length + ' مقاله';
-          }
+      .then(function (data) {
+        listState.data = data;
 
-          renderArticlesList(data, grid, emptyEl);
+        var countEl = document.getElementById('articles-count');
+        if (countEl) {
+          countEl.textContent = data.articles.length + ' مقاله';
+        }
 
-        if (searchInput) {
-          searchInput.addEventListener('input', function () {
-            searchQuery = normalizeText(searchInput.value);
-            renderArticlesList(data, grid, emptyEl);
+        applyListFilters(listState);
+
+        if (searchDesktop) {
+          searchDesktop.addEventListener('input', function () {
+            searchQuery = normalizeText(searchDesktop.value);
+            syncFilterUi();
+            applyListFilters(listState);
           });
         }
 
-        filterBtns.forEach(function (btn) {
+        filterDesktopBtns.forEach(function (btn) {
           btn.addEventListener('click', function () {
             activeCategory = btn.getAttribute('data-article-filter');
-            filterBtns.forEach(function (b) {
-              b.classList.toggle('active', b === btn);
-            });
-            renderArticlesList(data, grid, emptyEl);
+            syncFilterUi();
+            applyListFilters(listState);
           });
         });
+
+        initMobileFilterSheet(listState);
       })
       .catch(function () {
         grid.innerHTML = '<p class="articles-error">خطا در بارگذاری مقالات. لطفاً صفحه را رفرش کنید.</p>';
       });
   }
 
+  function applyListFilters(state) {
+    renderArticlesList(state.data, state.grid, state.emptyEl);
+    updateActiveFiltersBar();
+    updateFabBadge();
+  }
+
+  function syncFilterUi() {
+    var searchDesktop = document.getElementById('articles-search');
+    var searchMobile = document.getElementById('articles-search-mobile');
+
+    if (searchDesktop) searchDesktop.value = searchQuery;
+    if (searchMobile) searchMobile.value = searchQuery;
+
+    document.querySelectorAll('[data-article-filter]').forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-article-filter') === activeCategory);
+    });
+
+    document.querySelectorAll('[data-article-filter-mobile]').forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-article-filter-mobile') === activeCategory);
+    });
+  }
+
+  function getCategoryLabelById(category) {
+    var labels = {
+      all: 'همه',
+      nad: 'NAD+',
+      pdrn: 'PDRN',
+      agf: 'AGF',
+      other: 'سایر'
+    };
+    return labels[category] || category;
+  }
+
+  function updateActiveFiltersBar() {
+    var bar = document.getElementById('articles-active-filters');
+    if (!bar) return;
+
+    var chips = [];
+    if (activeCategory !== 'all') {
+      chips.push('<span class="articles-chip">' + escapeHtml(getCategoryLabelById(activeCategory)) + '</span>');
+    }
+    if (searchQuery) {
+      chips.push('<span class="articles-chip">«' + escapeHtml(searchQuery) + '»</span>');
+    }
+
+    if (chips.length === 0) {
+      bar.hidden = true;
+      bar.innerHTML = '';
+      return;
+    }
+
+    bar.hidden = false;
+    bar.innerHTML = '<span class="articles-active-filters__label">فیلتر فعال:</span>' + chips.join('');
+  }
+
+  function updateFabBadge() {
+    var badge = document.getElementById('articles-fab-badge');
+    if (!badge) return;
+
+    var count = 0;
+    if (activeCategory !== 'all') count += 1;
+    if (searchQuery) count += 1;
+
+    if (count === 0) {
+      badge.hidden = true;
+      return;
+    }
+
+    badge.hidden = false;
+    badge.textContent = String(count);
+  }
+
+  function initMobileFilterSheet(state) {
+    var fab = document.getElementById('articles-fab');
+    var sheet = document.getElementById('articles-sheet');
+    var searchMobile = document.getElementById('articles-search-mobile');
+    var applyBtn = document.getElementById('articles-filter-apply');
+    var resetBtn = document.getElementById('articles-filter-reset');
+    var mobileFilterBtns = document.querySelectorAll('[data-article-filter-mobile]');
+    var pendingCategory = activeCategory;
+    var pendingSearch = searchQuery;
+
+    if (!fab || !sheet) return;
+
+    function syncPendingFromActive() {
+      pendingCategory = activeCategory;
+      pendingSearch = searchQuery;
+      if (searchMobile) searchMobile.value = pendingSearch;
+      mobileFilterBtns.forEach(function (btn) {
+        btn.classList.toggle('active', btn.getAttribute('data-article-filter-mobile') === pendingCategory);
+      });
+    }
+
+    function openSheet() {
+      syncPendingFromActive();
+      sheet.classList.add('open');
+      sheet.setAttribute('aria-hidden', 'false');
+      fab.setAttribute('aria-expanded', 'true');
+      document.body.classList.add('articles-sheet-open');
+      if (searchMobile) {
+        setTimeout(function () { searchMobile.focus(); }, 280);
+      }
+    }
+
+    function closeSheet() {
+      sheet.classList.remove('open');
+      sheet.setAttribute('aria-hidden', 'true');
+      fab.setAttribute('aria-expanded', 'false');
+      document.body.classList.remove('articles-sheet-open');
+    }
+
+    fab.addEventListener('click', openSheet);
+
+    sheet.querySelectorAll('[data-sheet-close]').forEach(function (el) {
+      el.addEventListener('click', closeSheet);
+    });
+
+    mobileFilterBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        pendingCategory = btn.getAttribute('data-article-filter-mobile');
+        mobileFilterBtns.forEach(function (b) {
+          b.classList.toggle('active', b === btn);
+        });
+      });
+    });
+
+    if (searchMobile) {
+      searchMobile.addEventListener('input', function () {
+        pendingSearch = normalizeText(searchMobile.value);
+      });
+    }
+
+    if (applyBtn) {
+      applyBtn.addEventListener('click', function () {
+        activeCategory = pendingCategory;
+        searchQuery = pendingSearch;
+        syncFilterUi();
+        applyListFilters(state);
+        closeSheet();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        pendingCategory = 'all';
+        pendingSearch = '';
+        if (searchMobile) searchMobile.value = '';
+        mobileFilterBtns.forEach(function (btn) {
+          btn.classList.toggle('active', btn.getAttribute('data-article-filter-mobile') === 'all');
+        });
+      });
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && sheet.classList.contains('open')) {
+        closeSheet();
+      }
+    });
+  }
+
   function renderArticlesList(data, grid, emptyEl) {
     var filtered = data.articles.filter(function (article) {
       return matchesCategory(article, activeCategory) && matchesSearch(article, searchQuery);
+    });
+
+    filtered.sort(function (a, b) {
+      var yearDiff = (b.year || 0) - (a.year || 0);
+      if (yearDiff !== 0) return yearDiff;
+      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
     });
 
     if (filtered.length === 0) {
@@ -127,14 +301,16 @@
     var label = getCategoryLabel(data, article.category);
     return (
       '<a href="article.html?id=' + escapeAttr(article.id) + '" class="article-card article-card--' + escapeAttr(article.category) + '">' +
-        '<span class="article-card__badge">' + escapeHtml(label) + '</span>' +
-        '<h2 class="article-card__title-fa">' + escapeHtml(article.titleFa) + '</h2>' +
-        '<p class="article-card__title-en" dir="ltr">' + escapeHtml(article.titleEn) + '</p>' +
-        '<dl class="article-card__meta">' +
-          '<div><dt>سال انتشار</dt><dd>' + escapeHtml(String(article.year)) + '</dd></div>' +
-          '<div><dt>ژورنال</dt><dd>' + escapeHtml(article.journalFa) + '<span class="article-card__journal-en" dir="ltr">' + escapeHtml(article.journalEn) + '</span></dd></div>' +
-        '</dl>' +
-        '<span class="article-card__link">مشاهده مقاله ←</span>' +
+        '<div class="article-card__stripe" aria-hidden="true"></div>' +
+        '<div class="article-card__body">' +
+          '<span class="article-card__badge">' + escapeHtml(label) + '</span>' +
+          '<h2 class="article-card__title-en" dir="ltr" lang="en">' + escapeHtml(article.titleEn) + '</h2>' +
+          '<p class="article-card__title-fa" lang="fa">' + escapeHtml(article.titleFa) + '</p>' +
+          '<div class="article-card__footer">' +
+            '<span class="article-card__year">سال انتشار: ' + escapeHtml(String(article.year)) + '</span>' +
+            '<span class="article-card__cta" aria-hidden="true">←</span>' +
+          '</div>' +
+        '</div>' +
       '</a>'
     );
   }
@@ -176,8 +352,8 @@
       '</header>' +
       '<article class="article-page__content">' +
         '<span class="article-page__badge article-page__badge--' + escapeAttr(article.category) + '">' + escapeHtml(label) + '</span>' +
-        '<h1 class="article-page__title-fa">' + escapeHtml(article.titleFa) + '</h1>' +
-        '<p class="article-page__title-en" dir="ltr">' + escapeHtml(article.titleEn) + '</p>' +
+        '<h1 class="article-page__title-en" dir="ltr" lang="en">' + escapeHtml(article.titleEn) + '</h1>' +
+        '<p class="article-page__title-fa" lang="fa">' + escapeHtml(article.titleFa) + '</p>' +
         '<dl class="article-page__meta">' +
           '<div><dt>سال انتشار</dt><dd>' + escapeHtml(String(article.year)) + '</dd></div>' +
           '<div><dt>ژورنال</dt><dd>' + escapeHtml(article.journalFa) + ' <span dir="ltr">(' + escapeHtml(article.journalEn) + ')</span></dd></div>' +
