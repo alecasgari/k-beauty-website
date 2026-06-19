@@ -8,29 +8,8 @@
 
   const TELEGRAM_BOT_URL = 'https://t.me/nadplus_webinar_bot';
   const CONTACT_WEBHOOK_URL = 'https://n8n.alecasgari.com/webhook/83a059c5-7260-4956-9d4c-40442611c076';
+  const CERT_LOOKUP_WEBHOOK_URL = 'https://n8n.alecasgari.com/webhook/kbeauty-certificate-lookup';
   const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
-
-  /* --- Mock Certificate Database --- */
-  const CERTIFICATES = [
-    {
-      code: 'KBA-2026-101',
-      name: 'دکتر سارا احمدی',
-      specialty: 'متخصص پوست و مو',
-      certificate: 'PDRN Certified'
-    },
-    {
-      code: 'KBA-2026-102',
-      name: 'دکتر محمد رضایی',
-      specialty: 'پزشک زیبایی',
-      certificate: 'NAD+ Therapy Certified'
-    },
-    {
-      code: 'KBA-2026-103',
-      name: 'دکتر نیلوفر کریمی',
-      specialty: 'متخصص پوست',
-      certificate: 'AGF39 Hair Restoration Certified'
-    }
-  ];
 
   /* --- DOM Ready --- */
   document.addEventListener('DOMContentLoaded', init);
@@ -126,6 +105,7 @@
   function initVerifyForm() {
     const form = document.getElementById('verify-form');
     const resultEl = document.getElementById('verify-result');
+    const submitBtn = document.getElementById('verify-submit');
 
     if (!form || !resultEl) return;
 
@@ -133,27 +113,80 @@
       e.preventDefault();
 
       const input = document.getElementById('cert-code');
-      const code = input.value.trim().toUpperCase();
+      const certNo = input.value.trim();
 
-      if (!code) {
+      if (!certNo) {
         showVerifyResult(resultEl, false, 'لطفاً کد گواهینامه را وارد کنید.');
         return;
       }
 
-      const cert = CERTIFICATES.find(function (c) {
-        return c.code === code;
-      });
+      setVerifyLoading(form, submitBtn, true);
+      hideVerifyResult(resultEl);
 
-      if (cert) {
-        showVerifyResult(resultEl, true, null, cert);
-      } else {
-        showVerifyResult(resultEl, false, 'کد نامعتبر است');
-      }
+      fetch(CERT_LOOKUP_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ certNo: certNo })
+      })
+        .then(function (response) {
+          return response.text().then(function (text) {
+            var data = {};
+
+            try {
+              data = text ? JSON.parse(text) : {};
+            } catch (err) {
+              throw new Error('invalid_json');
+            }
+
+            if (Array.isArray(data)) {
+              data = data[0] || {};
+            }
+
+            if (!response.ok && !data.valid && !data.message) {
+              throw new Error('server');
+            }
+
+            return data;
+          });
+        })
+        .then(function (data) {
+          if (data.valid) {
+            showVerifyResult(resultEl, true, null, data);
+          } else {
+            showVerifyResult(resultEl, false, data.message || 'کد گواهینامه یافت نشد');
+          }
+        })
+        .catch(function (err) {
+          var isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+          if (isLocal) {
+            showVerifyResult(resultEl, false, 'خطا در اتصال به سرور (احتمالاً CORS). از k-beauty.academy تست کنید یا CORS در n8n را * بگذارید.');
+          } else {
+            showVerifyResult(resultEl, false, 'خطا در استعلام. لطفاً چند لحظه بعد دوباره تلاش کنید.');
+          }
+        })
+        .finally(function () {
+          setVerifyLoading(form, submitBtn, false);
+        });
     });
   }
 
+  function setVerifyLoading(form, submitBtn, isLoading) {
+    const input = document.getElementById('cert-code');
+    if (form) form.classList.toggle('verify-form--loading', isLoading);
+    if (input) input.disabled = isLoading;
+    if (submitBtn) {
+      submitBtn.disabled = isLoading;
+      submitBtn.textContent = isLoading ? 'در حال بررسی...' : 'بررسی اعتبار';
+    }
+  }
+
+  function hideVerifyResult(el) {
+    el.classList.remove('show', 'verify-result--success', 'verify-result--error', 'verify-result--loading');
+    el.innerHTML = '';
+  }
+
   function showVerifyResult(el, success, errorMsg, cert) {
-    el.classList.remove('show', 'verify-result--success', 'verify-result--error');
+    el.classList.remove('show', 'verify-result--success', 'verify-result--error', 'verify-result--loading');
     el.innerHTML = '';
 
     void el.offsetWidth;
@@ -163,12 +196,12 @@
       el.innerHTML =
         '<h3>✓ گواهینامه معتبر است</h3>' +
         '<dl class="cert-details">' +
-        '<dt>نام پزشک</dt><dd>' + escapeHtml(cert.name) + '</dd>' +
-        '<dt>تخصص</dt><dd>' + escapeHtml(cert.specialty) + '</dd>' +
-        '<dt>نوع گواهینامه</dt><dd>' + escapeHtml(cert.certificate) + '</dd>' +
-        '<dt>کد گواهینامه</dt><dd style="direction:ltr;text-align:right">' + escapeHtml(cert.code) + '</dd>' +
+        '<dt>نام</dt><dd>' + escapeHtml(cert.name || '—') + '</dd>' +
+        '<dt>وبینار</dt><dd>' + escapeHtml(cert.webinar || '—') + '</dd>' +
+        '<dt>وضعیت</dt><dd>' + escapeHtml(cert.status || '—') + '</dd>' +
+        '<dt>کد گواهینامه</dt><dd style="direction:ltr;text-align:right">' + escapeHtml(cert.certNo || '—') + '</dd>' +
         '</dl>' +
-        '<span class="cert-badge">' + escapeHtml(cert.certificate) + '</span>';
+        '<span class="cert-badge">' + escapeHtml(cert.webinar || 'کی‌بیوتی آکادمی') + '</span>';
     } else {
       el.className = 'verify-result verify-result--error';
       el.innerHTML = '<h3>✕ ' + escapeHtml(errorMsg) + '</h3>';

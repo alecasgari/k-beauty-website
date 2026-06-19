@@ -1,0 +1,145 @@
+{
+  "name": "K-Beauty Certificate Lookup",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "kbeauty-certificate-lookup",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "a1f3c8e2-4b21-4f5a-9c3d-8e7f2a1b0c9d",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        260,
+        320
+      ],
+      "webhookId": "kbeauty-certificate-lookup"
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "certNo",
+              "condition": "equals",
+              "keyValue": "={{ $json.body.certNo.trim() }}"
+            }
+          ]
+        },
+        "returnAll": true,
+        "options": {
+          "alwaysOutputData": true
+        }
+      },
+      "id": "b2e4d9f1-5c32-4a8b-8d1e-9f3c2b7a6e5d",
+      "name": "Get Certificate Row",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        520,
+        320
+      ],
+      "notes": "بعد از import، Data Table خودتان را انتخاب کنید (همان جدول certNo)."
+    },
+    {
+      "parameters": {
+        "jsCode": "const webhook = $('Webhook').first().json;\nconst certNo = String(webhook.body?.certNo || '').trim();\n\nif (!certNo) {\n  return [{ json: { valid: false, message: 'کد گواهینامه وارد نشده است' } }];\n}\n\nconst rows = $input.all()\n  .map(item => item.json)\n  .filter(row => row && row.certNo);\n\nconst match = rows.find(row => String(row.certNo).trim().toUpperCase() === certNo.toUpperCase()) || rows[0];\n\nif (!match || !match.certNo) {\n  return [{ json: { valid: false, message: 'کد گواهینامه یافت نشد' } }];\n}\n\nconst statusRaw = String(match.status || '').trim();\nlet status = statusRaw;\n\nif (statusRaw.includes('DONE')) {\n  status = 'تکمیل شده';\n} else if (statusRaw === 'Generated') {\n  status = 'صادر شده';\n} else if (statusRaw.length > 80) {\n  status = statusRaw.split('\\n')[0];\n}\n\nreturn [{\n  json: {\n    valid: true,\n    certNo: String(match.certNo).trim(),\n    name: String(match.name || '').replace(/\\s+/g, ' ').trim(),\n    webinar: String(match.webinar || '').trim(),\n    status: status\n  }\n}];"
+      },
+      "id": "c3f5a1b2-6d43-4b9c-9e2f-0a4b3c8d7e6f",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "d4a6b2c3-7e54-4c0d-0f3a-1b5c6d7e8f9a",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1040,
+        320
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Certificate Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Certificate Row": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}
