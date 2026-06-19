@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="مقالات علمی K-Beauty Academy — مرور تحقیقات NAD+، PDRN و AGF در پزشکی زیبایی و بیوتکنولوژی جوانسازی">
+  <title>مقالات علمی | K-Beauty Academy</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="images/logo/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="images/logo/apple-touch-icon.png">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo" aria-label="کی‌بیوتی آکادمی">
+        <img src="images/logo/logo.png" alt="" class="logo-img" width="40" height="40">
+        <div class="logo-text">
+          <span>کی‌بیوتی آکادمی</span>
+          <span>k-beauty.academy</span>
+        </div>
+      </a>
+      <nav class="main-nav" aria-label="منوی اصلی">
+        <ul>
+          <li><a href="index.html">خانه</a></li>
+          <li><a href="novanad.html">NovaNAD+</a></li>
+          <li><a href="pncell.html">PN CELL</a></li>
+          <li><a href="agf39.html">AGF39</a></li>
+          <li><a href="academy.html">آکادمی</a></li>
+          <li><a href="articles.html">مقالات علمی</a></li>
+          <li><a href="verify.html">استعلام</a></li>
+          <li><a href="contact.html">تماس</a></li>
+        </ul>
+      </nav>
+      <button class="menu-toggle" aria-label="باز کردن منو" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="mobile-nav" aria-hidden="true">
+    <nav class="mobile-nav-panel" aria-label="منوی موبایل">
+      <ul>
+        <li><a href="index.html">خانه</a></li>
+        <li><a href="novanad.html">NovaNAD+</a></li>
+        <li><a href="pncell.html">PN CELL</a></li>
+        <li><a href="agf39.html">AGF39</a></li>
+        <li><a href="academy.html">آکادمی</a></li>
+        <li><a href="articles.html">مقالات علمی</a></li>
+        <li><a href="verify.html">استعلام گواهینامه</a></li>
+        <li><a href="contact.html">تماس با ما</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <main>
+    <section class="page-hero page-hero--bg page-hero--articles">
+      <div class="container">
+        <span class="eyebrow">Scientific Articles</span>
+        <h1>مقالات علمی</h1>
+        <p class="lead">مجموعه‌ای از تحقیقات منتشرشده در حوزه NAD+، PDRN و پپتیدهای رشد فاکتور — <span id="articles-count"></span></p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="articles-layout">
+          <aside class="articles-sidebar" aria-label="فیلتر و جستجو">
+            <div class="articles-sidebar__block">
+              <label for="articles-search" class="articles-sidebar__label">جستجو</label>
+              <input
+                type="search"
+                id="articles-search"
+                class="articles-search-input"
+                placeholder="عنوان یا نام ژورنال..."
+                autocomplete="off"
+              >
+              <p class="articles-sidebar__hint">جستجو در عنوان فارسی/انگلیسی و نام ژورنال</p>
+            </div>
+
+            <div class="articles-sidebar__block">
+              <h2 class="articles-sidebar__label">دسته‌بندی</h2>
+              <div class="articles-filters" role="group" aria-label="فیلتر دسته‌بندی">
+                <button type="button" class="articles-filter active" data-article-filter="all">همه</button>
+                <button type="button" class="articles-filter" data-article-filter="nad">NAD+</button>
+                <button type="button" class="articles-filter" data-article-filter="pdrn">PDRN</button>
+                <button type="button" class="articles-filter" data-article-filter="agf">AGF</button>
+                <button type="button" class="articles-filter" data-article-filter="other">سایر</button>
+              </div>
+            </div>
+          </aside>
+
+          <div class="articles-main">
+            <div id="articles-grid" class="articles-grid" aria-live="polite"></div>
+            <p id="articles-empty" class="articles-empty" hidden>مقاله‌ای یافت نشد.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="logo" aria-label="کی‌بیوتی آکادمی">
+            <img src="images/logo/logo.png" alt="" class="logo-img" width="36" height="36">
+            <div class="logo-text">
+              <span>کی‌بیوتی آکادمی</span>
+              <span>k-beauty.academy</span>
+            </div>
+          </a>
+          <p>مرجع آموزش‌های تخصصی پزشکی زیبایی و بیوتکنولوژی جوانسازی</p>
+        </div>
+        <div class="footer-links">
+          <h4>محصولات</h4>
+          <ul>
+            <li><a href="novanad.html">NovaNAD+</a></li>
+            <li><a href="pncell.html">PN CELL</a></li>
+            <li><a href="agf39.html">AGF39 Forte</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h4>آکادمی</h4>
+          <ul>
+            <li><a href="academy.html">وبینارها</a></li>
+            <li><a href="articles.html">مقالات علمی</a></li>
+            <li><a href="verify.html">استعلام گواهینامه</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h4>ارتباط</h4>
+          <ul>
+            <li><a href="mailto:info@k-beauty.academy">info@k-beauty.academy</a></li>
+            <li><a href="#" data-telegram>ربات تلگرام</a></li>
+            <li><a href="contact.html">تماس با ما</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© ۱۴۰۵ K-Beauty Academy — تمامی حقوق محفوظ است</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="main.js?v=2"></script>
+  <script src="articles.js?v=2"></script>
+</body>
+</html>
