@@ -334,6 +334,7 @@
           return;
         }
         renderArticleDetail(article, data, container);
+        initArticleShare(article);
         document.title = article.titleFa + ' | K-Beauty Academy';
       })
       .catch(function () {
@@ -364,7 +365,20 @@
         '</div>' +
         '<div class="article-page__actions">' +
           '<a href="' + escapeAttr(pdfUrl) + '" download="' + escapeAttr(downloadName) + '" class="btn btn--primary">دانلود PDF</a>' +
+          '<div class="article-share">' +
+            '<button type="button" class="btn btn--outline article-share__toggle" aria-expanded="false" aria-controls="article-share-menu">' +
+              'اشتراک‌گذاری' +
+            '</button>' +
+            '<div class="article-share__menu" id="article-share-menu" hidden>' +
+              '<button type="button" class="article-share__item" data-share="copy">کپی متن</button>' +
+              '<a class="article-share__item" data-share="whatsapp" href="#" target="_blank" rel="noopener noreferrer">واتساپ</a>' +
+              '<a class="article-share__item" data-share="telegram" href="#" target="_blank" rel="noopener noreferrer">تلگرام</a>' +
+              '<a class="article-share__item" data-share="email" href="#">ایمیل</a>' +
+              '<a class="article-share__item" data-share="linkedin" href="#" target="_blank" rel="noopener noreferrer">لینکدین</a>' +
+            '</div>' +
+          '</div>' +
         '</div>' +
+        '<p class="article-share__toast" id="article-share-toast" role="status" aria-live="polite" hidden>متن کپی شد</p>' +
         '<section class="article-page__preview" aria-label="پیش‌نمایش PDF">' +
           '<h2>پیش‌نمایش</h2>' +
           '<div class="article-page__preview-frame">' +
@@ -373,6 +387,112 @@
           '<p class="article-page__preview-note">اگر پیش‌نمایش نمایش داده نشد، از دکمه دانلود استفاده کنید.</p>' +
         '</section>' +
       '</article>';
+  }
+
+  function buildShareText(titleFa) {
+    var url = window.location.href.split('#')[0];
+    return (
+      'من مقاله با عنوان «' + titleFa + '» را در وب‌سایت کی‌بیوتی آکادمی دیدم و به نظرم جالب آمد. این لینک آن مقاله است:\n' +
+      url
+    );
+  }
+
+  function initArticleShare(article) {
+    var toggle = document.querySelector('.article-share__toggle');
+    var menu = document.getElementById('article-share-menu');
+    var toast = document.getElementById('article-share-toast');
+    if (!toggle || !menu) return;
+
+    var shareText = buildShareText(article.titleFa);
+    var shareUrl = window.location.href.split('#')[0];
+    var emailSubject = 'مقاله علمی — کی‌بیوتی آکادمی';
+    var telegramText = 'من مقاله «' + article.titleFa + '» را در کی‌بیوتی آکادمی دیدم.';
+
+    var whatsappLink = menu.querySelector('[data-share="whatsapp"]');
+    var telegramLink = menu.querySelector('[data-share="telegram"]');
+    var emailLink = menu.querySelector('[data-share="email"]');
+    var linkedinLink = menu.querySelector('[data-share="linkedin"]');
+    var copyBtn = menu.querySelector('[data-share="copy"]');
+
+    if (whatsappLink) {
+      whatsappLink.href = 'https://wa.me/?text=' + encodeURIComponent(shareText);
+    }
+    if (telegramLink) {
+      telegramLink.href =
+        'https://t.me/share/url?url=' + encodeURIComponent(shareUrl) +
+        '&text=' + encodeURIComponent(telegramText);
+    }
+    if (emailLink) {
+      emailLink.href =
+        'mailto:?subject=' + encodeURIComponent(emailSubject) +
+        '&body=' + encodeURIComponent(shareText);
+    }
+    if (linkedinLink) {
+      linkedinLink.href =
+        'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(shareUrl);
+    }
+
+    toggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var isOpen = menu.hidden;
+      menu.hidden = !isOpen;
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      toggle.classList.toggle('article-share__toggle--open', isOpen);
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.article-share')) {
+        menu.hidden = true;
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.classList.remove('article-share__toggle--open');
+      }
+    });
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        copyShareText(shareText, toast);
+        menu.hidden = true;
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.classList.remove('article-share__toggle--open');
+      });
+    }
+  }
+
+  function copyShareText(text, toastEl) {
+    function showToast() {
+      if (!toastEl) return;
+      toastEl.hidden = false;
+      clearTimeout(copyShareText._timer);
+      copyShareText._timer = setTimeout(function () {
+        toastEl.hidden = true;
+      }, 2500);
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(showToast).catch(function () {
+        fallbackCopy(text, showToast);
+      });
+      return;
+    }
+
+    fallbackCopy(text, showToast);
+  }
+
+  function fallbackCopy(text, onSuccess) {
+    var textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand('copy');
+      onSuccess();
+    } catch (err) {
+      /* clipboard unavailable */
+    }
+    document.body.removeChild(textarea);
   }
 
   function showArticleError(container, message) {
