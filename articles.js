@@ -335,6 +335,7 @@
         }
         renderArticleDetail(article, data, container);
         initArticleShare(article);
+        initArticleAnalytics(article);
         document.title = article.titleFa + ' | K-Beauty Academy';
       })
       .catch(function () {
@@ -450,10 +451,43 @@
 
     if (copyBtn) {
       copyBtn.addEventListener('click', function () {
+        trackArticleShareEvent('copy', article);
         copyShareText(shareText, toast);
         menu.hidden = true;
         toggle.setAttribute('aria-expanded', 'false');
         toggle.classList.remove('article-share__toggle--open');
+      });
+    }
+
+    menu.querySelectorAll('.article-share__item').forEach(function (item) {
+      if (item === copyBtn) return;
+
+      item.addEventListener('click', function () {
+        var method = item.getAttribute('data-share') || (item.textContent || '').trim();
+        trackArticleShareEvent(method, article);
+      });
+    });
+  }
+
+  function trackArticleShareEvent(method, article) {
+    if (!window.kbAnalytics) return;
+    window.kbAnalytics.trackArticleShare(method, article.id, article.titleFa);
+  }
+
+  function initArticleAnalytics(article) {
+    if (!window.kbAnalytics) return;
+
+    window.kbAnalytics.trackPageView({
+      page_type: 'article',
+      article_id: article.id,
+      article_category: article.category,
+      article_title: article.titleFa
+    });
+
+    var downloadBtn = document.querySelector('.article-page__actions a[download]');
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', function () {
+        window.kbAnalytics.trackFileDownload(article.id + '.pdf', article.id);
       });
     }
   }

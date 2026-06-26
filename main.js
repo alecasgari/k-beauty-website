@@ -15,6 +15,7 @@
   document.addEventListener('DOMContentLoaded', init);
 
   function init() {
+    initAnalytics();
     initUtmCapture();
     initMobileMenu();
     initNavDropdowns();
@@ -23,6 +24,68 @@
     initVerifyForm();
     initContactForm();
     setTelegramLinks();
+  }
+
+  /* --- Analytics (GTM dataLayer) --- */
+  function initAnalytics() {
+    if (!window.kbAnalytics) return;
+
+    window.kbAnalytics.trackPageView();
+    initCtaTracking();
+    initOutboundTracking();
+  }
+
+  function initCtaTracking() {
+    document.addEventListener('click', function (e) {
+      if (!window.kbAnalytics) return;
+
+      var telegramEl = e.target.closest('[data-telegram]');
+      if (telegramEl) {
+        window.kbAnalytics.trackCtaClick({
+          cta_name: 'telegram_bot',
+          cta_text: (telegramEl.textContent || '').trim(),
+          link_url: telegramEl.href || ''
+        });
+        return;
+      }
+
+      var cta = e.target.closest('a.btn--primary[href]');
+      if (!cta) return;
+
+      var href = cta.getAttribute('href') || '';
+      if (href.indexOf('academy.html') === -1 && href.indexOf('t.me') === -1) return;
+
+      window.kbAnalytics.trackCtaClick({
+        cta_name: href.indexOf('t.me') !== -1 ? 'telegram_register' : 'academy_registration',
+        cta_text: (cta.textContent || '').trim(),
+        link_url: cta.href || href
+      });
+    });
+  }
+
+  function initOutboundTracking() {
+    document.addEventListener('click', function (e) {
+      if (!window.kbAnalytics) return;
+
+      var link = e.target.closest('a[href]');
+      if (!link) return;
+
+      var href = link.getAttribute('href');
+      if (!href || href.charAt(0) === '#' || href.indexOf('javascript:') === 0) return;
+      if (link.hasAttribute('data-telegram')) return;
+      if (link.closest('.article-share')) return;
+
+      var url;
+      try {
+        url = new URL(href, window.location.origin);
+      } catch (err) {
+        return;
+      }
+
+      if (url.hostname === window.location.hostname) return;
+
+      window.kbAnalytics.trackOutboundClick(url.href, (link.textContent || '').trim());
+    });
   }
 
   /* --- Mobile Menu --- */
@@ -174,7 +237,14 @@
 
       if (!certNo) {
         showVerifyResult(resultEl, false, 'لطفاً کد گواهینامه را وارد کنید.');
+        if (window.kbAnalytics) {
+          window.kbAnalytics.trackFormError('certificate', 'validation', 'empty_cert_code');
+        }
         return;
+      }
+
+      if (window.kbAnalytics) {
+        window.kbAnalytics.trackFormStart('certificate');
       }
 
       setVerifyLoading(form, submitBtn, true);
@@ -209,11 +279,20 @@
         .then(function (data) {
           if (data.valid) {
             showVerifyResult(resultEl, true, null, data);
+            if (window.kbAnalytics) {
+              window.kbAnalytics.trackCertificateVerify('valid');
+            }
           } else {
             showVerifyResult(resultEl, false, data.message || 'کد گواهینامه یافت نشد');
+            if (window.kbAnalytics) {
+              window.kbAnalytics.trackCertificateVerify('invalid');
+            }
           }
         })
         .catch(function (err) {
+          if (window.kbAnalytics) {
+            window.kbAnalytics.trackCertificateVerify('error');
+          }
           var isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
           if (isLocal) {
             showVerifyResult(resultEl, false, 'خطا در اتصال به سرور (احتمالاً CORS). از k-beauty.academy تست کنید یا CORS در n8n را * بگذارید.');
@@ -317,6 +396,13 @@
     const otherGroup = document.getElementById('specialty-other-group');
     const otherInput = form.querySelector('[name="specialty_other"]');
     const submitBtn = document.getElementById('contact-submit');
+    let formStarted = false;
+
+    function trackContactStartOnce() {
+      if (formStarted || !window.kbAnalytics) return;
+      formStarted = true;
+      window.kbAnalytics.trackFormStart('contact');
+    }
 
     if (specialtySelect && otherGroup && otherInput) {
       specialtySelect.addEventListener('change', function () {
@@ -330,6 +416,8 @@
       });
     }
 
+    form.addEventListener('focusin', trackContactStartOnce);
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
 
@@ -341,18 +429,29 @@
 
       if (!name || !phone) {
         showToast('لطفاً نام و شماره تماس را وارد کنید.', false);
+        if (window.kbAnalytics) {
+          window.kbAnalytics.trackFormError('contact', 'validation', 'missing_name_or_phone');
+        }
         return;
       }
 
       if (!specialty) {
         showToast('لطفاً تخصص خود را انتخاب کنید.', false);
+        if (window.kbAnalytics) {
+          window.kbAnalytics.trackFormError('contact', 'validation', 'missing_specialty');
+        }
         return;
       }
 
       if (specialty === 'سایر' && !specialtyOther) {
         showToast('لطفاً تخصص خود را بنویسید.', false);
+        if (window.kbAnalytics) {
+          window.kbAnalytics.trackFormError('contact', 'validation', 'missing_specialty_other');
+        }
         return;
       }
+
+      trackContactStartOnce();
 
       const payload = {
         name: name,
@@ -379,9 +478,16 @@
             throw new Error('Request failed');
           }
           showContactSuccess();
+          if (window.kbAnalytics) {
+            window.kbAnalytics.trackFormSubmit('contact', { specialty: specialty });
+            window.kbAnalytics.trackConversion('contact_form');
+          }
         })
         .catch(function () {
           showToast('ارسال با خطا مواجه شد. لطفاً دوباره تلاش کنید.', false);
+          if (window.kbAnalytics) {
+            window.kbAnalytics.trackFormError('contact', 'network', 'submit_failed');
+          }
           if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.textContent = 'ارسال پیام';
