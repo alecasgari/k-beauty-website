@@ -226,13 +226,15 @@
     const form = document.getElementById('verify-form');
     const resultEl = document.getElementById('verify-result');
     const submitBtn = document.getElementById('verify-submit');
+    const input = document.getElementById('cert-code');
 
     if (!form || !resultEl) return;
+
+    prefillCertFromUrl(input);
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
 
-      const input = document.getElementById('cert-code');
       const certNo = input.value.trim();
 
       if (!certNo) {
@@ -304,6 +306,24 @@
           setVerifyLoading(form, submitBtn, false);
         });
     });
+  }
+
+  function prefillCertFromUrl(input) {
+    if (!input) return;
+
+    var params = new URLSearchParams(window.location.search);
+    var certFromUrl = params.get('cert') || params.get('code') || params.get('certNo');
+
+    if (!certFromUrl) return;
+
+    certFromUrl = certFromUrl.trim();
+    if (!certFromUrl) return;
+
+    input.value = certFromUrl;
+
+    if (params.get('auto') === '1') {
+      input.form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    }
   }
 
   function setVerifyLoading(form, submitBtn, isLoading) {
