@@ -713,6 +713,67 @@ p {
   50% { transform: translateY(-12px); }
 }
 
+@media (max-width: 767px) {
+  .hero {
+    min-height: auto;
+    align-items: flex-start;
+    padding-top: calc(var(--header-height) + 1.5rem);
+    padding-bottom: 2.75rem;
+  }
+
+  .hero-grid {
+    padding: 0;
+    gap: 1.25rem;
+  }
+
+  .hero--home {
+    min-height: clamp(32rem, 88vh, 42rem);
+    background:
+      linear-gradient(180deg, rgba(10, 18, 32, 0.94) 0%, rgba(35, 20, 58, 0.9) 45%, rgba(10, 18, 32, 0.97) 100%),
+      url('images/hero/home-hero.webp') center 35% / cover no-repeat;
+  }
+
+  .hero--home::before {
+    display: block;
+    background: rgba(8, 14, 28, 0.28);
+  }
+
+  .hero--home::after {
+    height: 72px;
+  }
+
+  .hero--home > .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .hero--home .hero-content {
+    max-width: none;
+    padding: 0;
+  }
+
+  .hero--home h1 {
+    margin-bottom: 1rem;
+    line-height: 1.45;
+  }
+
+  .hero--home .lead {
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.85;
+  }
+
+  .hero--home .hero-cta {
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .hero--home .hero-cta .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 /* --- Product Cards --- */
 .products-grid {
   display: grid;
