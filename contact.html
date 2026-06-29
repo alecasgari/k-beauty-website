@@ -12,7 +12,7 @@
   <!-- End Google Tag Manager -->
   <meta name="description" content="تماس با K-Beauty Academy — ارتباط با تیم آکادمی پزشکی زیبایی">
   <title>تماس با ما | K-Beauty Academy</title>
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=7">
   <link rel="icon" href="images/logo/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="images/logo/apple-touch-icon.png">
 </head>
@@ -50,7 +50,12 @@
         </ul>
       </nav>
       <button class="menu-toggle" aria-label="باز کردن منو" aria-expanded="false">
-        <span></span><span></span><span></span>
+        <span class="menu-toggle__icon" aria-hidden="true">
+          <span class="menu-toggle__bar"></span>
+          <span class="menu-toggle__bar"></span>
+          <span class="menu-toggle__bar"></span>
+        </span>
+        <span class="menu-toggle__label">منو</span>
       </button>
     </div>
   </header>
@@ -101,6 +106,13 @@
             <div>
               <strong style="display:block;margin-bottom:0.25rem">ربات تلگرام</strong>
               <span>ثبت‌نام از طریق ربات تلگرام</span>
+            </div>
+          </a>
+          <a href="#" class="contact-link" data-telegram-channel>
+            <span class="icon">📢</span>
+            <div>
+              <strong style="display:block;margin-bottom:0.25rem">کانال رسمی تلگرام</strong>
+              <span>اطلاعیه وبینارها، مقالات و اخبار آکادمی</span>
             </div>
           </a>
         </div>
@@ -160,6 +172,10 @@
             </div>
           </a>
           <p>مرجع آموزش‌های تخصصی پزشکی زیبایی و بیوتکنولوژی جوانسازی</p>
+          <div class="footer-telegram">
+            <a href="#" class="footer-telegram__link" data-telegram>🤖 ربات تلگرام</a>
+            <a href="#" class="footer-telegram__link" data-telegram-channel>📢 کانال رسمی</a>
+          </div>
         </div>
         <div class="footer-links">
           <h4>محصولات</h4>
@@ -174,6 +190,7 @@
           <ul>
             <li><a href="mailto:info@k-beauty.academy">info@k-beauty.academy</a></li>
             <li><a href="#" data-telegram>ربات تلگرام</a></li>
+            <li><a href="#" data-telegram-channel>کانال تلگرام</a></li>
             <li><a href="contact.html">تماس با ما</a></li>
           </ul>
         </div>
@@ -185,6 +202,6 @@
   </footer>
 
   <script src="analytics.js?v=1"></script>
-  <script src="main.js?v=4"></script>
+  <script src="main.js?v=8"></script>
 </body>
 </html>

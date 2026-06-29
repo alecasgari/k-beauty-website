@@ -12,7 +12,7 @@
   <!-- End Google Tag Manager -->
   <meta name="description" content="مقالات علمی K-Beauty Academy — مرور تحقیقات NAD+، PDRN و AGF در پزشکی زیبایی و بیوتکنولوژی جوانسازی">
   <title>مقالات علمی | K-Beauty Academy</title>
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=7">
   <link rel="icon" href="images/logo/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="images/logo/apple-touch-icon.png">
 </head>
@@ -50,7 +50,12 @@
         </ul>
       </nav>
       <button class="menu-toggle" aria-label="باز کردن منو" aria-expanded="false">
-        <span></span><span></span><span></span>
+        <span class="menu-toggle__icon" aria-hidden="true">
+          <span class="menu-toggle__bar"></span>
+          <span class="menu-toggle__bar"></span>
+          <span class="menu-toggle__bar"></span>
+        </span>
+        <span class="menu-toggle__label">منو</span>
       </button>
     </div>
   </header>
@@ -86,6 +91,20 @@
 
     <section class="section">
       <div class="container">
+        <div class="telegram-strip">
+          <div class="telegram-strip__content">
+            <span class="telegram-strip__icon" aria-hidden="true">📢</span>
+            <div>
+              <p class="telegram-strip__title">کانال رسمی کی‌بیوتی آکادمی</p>
+              <p class="telegram-strip__text">اولین نفری باشید که از زمان وبینارها، مقالات علمی و اخبار آکادمی باخبر می‌شوید.</p>
+            </div>
+          </div>
+          <div class="telegram-strip__actions">
+            <a href="#" class="telegram-strip__btn telegram-strip__btn--channel" data-telegram-channel>عضویت در کانال</a>
+            <a href="#" class="telegram-strip__btn telegram-strip__btn--ghost" data-telegram>ربات ثبت‌نام</a>
+          </div>
+        </div>
+
         <div class="articles-layout">
           <aside class="articles-sidebar" aria-label="فیلتر و جستجو">
             <div class="articles-sidebar__block">
@@ -177,6 +196,10 @@
             </div>
           </a>
           <p>مرجع آموزش‌های تخصصی پزشکی زیبایی و بیوتکنولوژی جوانسازی</p>
+          <div class="footer-telegram">
+            <a href="#" class="footer-telegram__link" data-telegram>🤖 ربات تلگرام</a>
+            <a href="#" class="footer-telegram__link" data-telegram-channel>📢 کانال رسمی</a>
+          </div>
         </div>
         <div class="footer-links">
           <h4>محصولات</h4>
@@ -199,6 +222,7 @@
           <ul>
             <li><a href="mailto:info@k-beauty.academy">info@k-beauty.academy</a></li>
             <li><a href="#" data-telegram>ربات تلگرام</a></li>
+            <li><a href="#" data-telegram-channel>کانال تلگرام</a></li>
             <li><a href="contact.html">تماس با ما</a></li>
           </ul>
         </div>
@@ -210,7 +234,7 @@
   </footer>
 
   <script src="analytics.js?v=1"></script>
-  <script src="main.js?v=4"></script>
-  <script src="articles.js?v=8"></script>
+  <script src="main.js?v=8"></script>
+  <script src="articles.js?v=9"></script>
 </body>
 </html>

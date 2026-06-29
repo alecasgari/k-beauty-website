@@ -7,6 +7,7 @@
   'use strict';
 
   const TELEGRAM_BOT_URL = 'https://t.me/nadplus_webinar_bot';
+  const TELEGRAM_CHANNEL_URL = 'https://t.me/kbeauty_academy';
   const CONTACT_WEBHOOK_URL = 'https://n8n.alecasgari.com/webhook/83a059c5-7260-4956-9d4c-40442611c076';
   const CERT_LOOKUP_WEBHOOK_URL = 'https://n8n.alecasgari.com/webhook/kbeauty-certificate-lookup';
   const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
@@ -23,7 +24,124 @@
     initActiveNav();
     initVerifyForm();
     initContactForm();
+    initMobileDock();
+    initTelegramDockModal();
     setTelegramLinks();
+    setTelegramChannelLinks();
+  }
+
+  /* --- Mobile Bottom Dock --- */
+  function initMobileDock() {
+    if (document.querySelector('.mobile-dock')) return;
+
+    var page = window.location.pathname.split('/').pop() || 'index.html';
+    var isVerify = page === 'verify.html';
+    var isAcademy = page === 'academy.html';
+
+    var icons = {
+      verify: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 12.5l2 2 4.5-4.5"/><path d="M12 3.5l7.5 3.75V12c0 4.35-3 7.55-7.5 8.25C7.5 19.55 4.5 16.35 4.5 12V7.25L12 3.5z"/></svg>',
+      academy: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01"/></svg>',
+      telegram: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 4.5L3.5 11.5l5 2 2 5.5 2.5-3.5 4.5 4.5 3.5-15.5z"/><path d="M8.5 13.5l7 4"/></svg>'
+    };
+
+    var dock = document.createElement('nav');
+    dock.className = 'mobile-dock';
+    dock.setAttribute('aria-label', 'میانبرهای موبایل');
+    dock.innerHTML =
+      '<a href="verify.html" class="mobile-dock__item' + (isVerify ? ' mobile-dock__item--active' : '') + '">' +
+        '<span class="mobile-dock__icon">' + icons.verify + '</span>' +
+        '<span class="mobile-dock__label">استعلام</span>' +
+      '</a>' +
+      '<a href="academy.html" class="mobile-dock__item' + (isAcademy ? ' mobile-dock__item--active' : '') + '">' +
+        '<span class="mobile-dock__icon">' + icons.academy + '</span>' +
+        '<span class="mobile-dock__label">وبینارها</span>' +
+      '</a>' +
+      '<button type="button" class="mobile-dock__item" data-telegram-dock aria-haspopup="dialog">' +
+        '<span class="mobile-dock__icon">' + icons.telegram + '</span>' +
+        '<span class="mobile-dock__label">تلگرام</span>' +
+      '</button>';
+
+    document.body.appendChild(dock);
+    document.body.classList.add('has-mobile-dock');
+  }
+
+  function initTelegramDockModal() {
+    if (document.getElementById('telegram-dock-modal')) return;
+
+    var modal = document.createElement('div');
+    modal.className = 'telegram-dock-modal';
+    modal.id = 'telegram-dock-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'telegram-dock-modal-title');
+    modal.hidden = true;
+    modal.innerHTML =
+      '<div class="telegram-dock-modal__backdrop" data-telegram-modal-close></div>' +
+      '<div class="telegram-dock-modal__panel">' +
+        '<h2 class="telegram-dock-modal__title" id="telegram-dock-modal-title">تلگرام کی‌بیوتی</h2>' +
+        '<p class="telegram-dock-modal__text">کدام را می‌خواهید باز کنید؟</p>' +
+        '<div class="telegram-dock-modal__actions">' +
+          '<a href="' + TELEGRAM_BOT_URL + '" class="telegram-dock-modal__option" target="_blank" rel="noopener noreferrer" data-telegram-choice="bot">' +
+            '<span class="telegram-dock-modal__option-icon" aria-hidden="true">🤖</span>' +
+            '<span class="telegram-dock-modal__option-text"><strong>ربات تلگرام</strong><small>ثبت‌نام وبینار و گواهینامه</small></span>' +
+          '</a>' +
+          '<a href="' + TELEGRAM_CHANNEL_URL + '" class="telegram-dock-modal__option" target="_blank" rel="noopener noreferrer" data-telegram-choice="channel">' +
+            '<span class="telegram-dock-modal__option-icon" aria-hidden="true">📢</span>' +
+            '<span class="telegram-dock-modal__option-text"><strong>کانال تلگرام</strong><small>اخبار و اطلاعیه‌ها</small></span>' +
+          '</a>' +
+        '</div>' +
+        '<button type="button" class="telegram-dock-modal__close" data-telegram-modal-close>بستن</button>' +
+      '</div>';
+
+    document.body.appendChild(modal);
+
+    document.addEventListener('click', function (e) {
+      var trigger = e.target.closest('[data-telegram-dock]');
+      if (trigger) {
+        e.preventDefault();
+        openTelegramDockModal();
+        return;
+      }
+
+      if (e.target.closest('[data-telegram-modal-close]')) {
+        closeTelegramDockModal();
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !modal.hidden) {
+        closeTelegramDockModal();
+      }
+    });
+
+    modal.querySelectorAll('[data-telegram-choice]').forEach(function (link) {
+      link.addEventListener('click', function () {
+        if (window.kbAnalytics) {
+          window.kbAnalytics.trackCtaClick({
+            cta_name: link.getAttribute('data-telegram-choice') === 'channel' ? 'telegram_channel' : 'telegram_bot',
+            cta_text: link.querySelector('strong').textContent,
+            link_url: link.href
+          });
+        }
+        closeTelegramDockModal();
+      });
+    });
+  }
+
+  function openTelegramDockModal() {
+    var modal = document.getElementById('telegram-dock-modal');
+    if (!modal) return;
+    modal.hidden = false;
+    document.body.classList.add('telegram-dock-modal-open');
+    var firstLink = modal.querySelector('.telegram-dock-modal__option');
+    if (firstLink) firstLink.focus();
+  }
+
+  function closeTelegramDockModal() {
+    var modal = document.getElementById('telegram-dock-modal');
+    if (!modal) return;
+    modal.hidden = true;
+    document.body.classList.remove('telegram-dock-modal-open');
   }
 
   /* --- Analytics (GTM dataLayer) --- */
@@ -45,6 +163,16 @@
           cta_name: 'telegram_bot',
           cta_text: (telegramEl.textContent || '').trim(),
           link_url: telegramEl.href || ''
+        });
+        return;
+      }
+
+      var channelEl = e.target.closest('[data-telegram-channel]');
+      if (channelEl) {
+        window.kbAnalytics.trackCtaClick({
+          cta_name: 'telegram_channel',
+          cta_text: (channelEl.textContent || '').trim(),
+          link_url: channelEl.href || ''
         });
         return;
       }
@@ -73,6 +201,7 @@
       var href = link.getAttribute('href');
       if (!href || href.charAt(0) === '#' || href.indexOf('javascript:') === 0) return;
       if (link.hasAttribute('data-telegram')) return;
+      if (link.hasAttribute('data-telegram-channel')) return;
       if (link.closest('.article-share')) return;
 
       var url;
@@ -564,6 +693,19 @@
       el.setAttribute('rel', 'noopener noreferrer');
     });
   }
+
+  function setTelegramChannelLinks() {
+    document.querySelectorAll('[data-telegram-channel]').forEach(function (el) {
+      el.setAttribute('href', TELEGRAM_CHANNEL_URL);
+      el.setAttribute('target', '_blank');
+      el.setAttribute('rel', 'noopener noreferrer');
+    });
+  }
+
+  window.kbRefreshTelegramLinks = function () {
+    setTelegramLinks();
+    setTelegramChannelLinks();
+  };
 
   /* --- Utility --- */
   function escapeHtml(str) {

@@ -387,7 +387,23 @@
           '</div>' +
           '<p class="article-page__preview-note">اگر پیش‌نمایش نمایش داده نشد، از دکمه دانلود استفاده کنید.</p>' +
         '</section>' +
+        '<div class="telegram-strip telegram-strip--compact">' +
+          '<div class="telegram-strip__content">' +
+            '<span class="telegram-strip__icon" aria-hidden="true">📢</span>' +
+            '<div>' +
+              '<p class="telegram-strip__title">مقالات بیشتر در کانال ما</p>' +
+              '<p class="telegram-strip__text">خلاصه مقالات علمی، اخبار وبینارها و محتوای تخصصی K-Beauty</p>' +
+            '</div>' +
+          '</div>' +
+          '<div class="telegram-strip__actions">' +
+            '<a href="#" class="telegram-strip__btn telegram-strip__btn--channel" data-telegram-channel>عضویت در کانال</a>' +
+          '</div>' +
+        '</div>' +
       '</article>';
+
+    if (typeof window.kbRefreshTelegramLinks === 'function') {
+      window.kbRefreshTelegramLinks();
+    }
   }
 
   function buildShareText(titleFa) {
