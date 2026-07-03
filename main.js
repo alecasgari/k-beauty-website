@@ -667,6 +667,7 @@
 
     bindPersianInput(form.querySelector('[name="full_name"]'), 150);
     bindPersianInput(form.querySelector('[name="center_name"]'), 150);
+    bindPersianInput(form.querySelector('[name="city"]'), 100);
     bindPersianInput(otherInput, 150);
     bindPhoneInput(form.querySelector('[name="phone"]'));
 
@@ -743,6 +744,7 @@
 
       const fullName = sanitizePersianText(form.querySelector('[name="full_name"]').value.trim(), 150);
       const centerName = sanitizePersianText(form.querySelector('[name="center_name"]').value.trim(), 150);
+      const city = sanitizePersianText(form.querySelector('[name="city"]').value.trim(), 100);
       const email = emailInput.value.trim();
       const emailConfirm = emailConfirmInput.value.trim();
       const specialty = specialtySelect.value;
@@ -765,6 +767,14 @@
         hasError = true;
       } else if (!/^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\s\u200c]+$/.test(centerName)) {
         showFieldError('center-name-group', 'center_name-error', 'فقط حروف فارسی مجاز است.');
+        hasError = true;
+      }
+
+      if (!city) {
+        showFieldError('city-group', 'city-error', 'لطفاً شهر را وارد کنید.');
+        hasError = true;
+      } else if (!/^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\s\u200c]+$/.test(city)) {
+        showFieldError('city-group', 'city-error', 'فقط حروف فارسی مجاز است.');
         hasError = true;
       }
 
@@ -813,6 +823,7 @@
         full_name: fullName,
         name: fullName,
         center_name: centerName,
+        city: city,
         email: email,
         email_confirm: emailConfirm,
         specialty: specialty,
@@ -883,6 +894,7 @@
       const items = [
         { label: 'نام کامل', value: data.full_name },
         { label: 'نام مرکز درمانی', value: data.center_name },
+        { label: 'شهر', value: data.city },
         { label: 'ایمیل', value: data.email },
         { label: 'تخصص', value: data.specialty_detail || data.specialty },
         { label: 'شماره تماس', value: data.phone },
