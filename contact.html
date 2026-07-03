@@ -12,7 +12,7 @@
   <!-- End Google Tag Manager -->
   <meta name="description" content="تماس با K-Beauty Academy — ارتباط با تیم آکادمی پزشکی زیبایی">
   <title>تماس با ما | K-Beauty Academy</title>
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=12">
   <link rel="icon" href="images/logo/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="images/logo/apple-touch-icon.png">
 </head>
@@ -81,18 +81,117 @@
   </div>
 
   <main>
-    <section class="page-hero" style="padding-bottom:2rem">
+    <section class="page-hero page-hero--contact">
       <div class="container">
-        <span class="eyebrow">Get in Touch</span>
+        <span class="eyebrow">Partnership &amp; Contact</span>
         <h1>تماس با ما</h1>
         <p class="lead">تیم K-Beauty Academy آماده پاسخگویی به سوالات شماست</p>
+        <p class="page-hero__note">کی‌بیوتی آکادمی برای محصولات خود نمایندگی می‌پذیرد.</p>
       </div>
     </section>
 
     <div class="container contact-grid">
+      <div class="contact-form-card">
+        <h2>فرم درخواست نمایندگی / تماس</h2>
+        <div id="contact-form-wrapper">
+          <form id="contact-form" novalidate>
+            <div class="form-honeypot" aria-hidden="true">
+              <label for="website">وب‌سایت</label>
+              <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+            </div>
+
+            <div class="form-group" id="full-name-group">
+              <label for="full_name">نام کامل</label>
+              <input type="text" id="full_name" name="full_name" placeholder="نام و نام خانوادگی" maxlength="150" required autocomplete="name">
+              <p class="form-error" id="full_name-error" hidden></p>
+            </div>
+
+            <div class="form-group" id="center-name-group">
+              <label for="center_name">نام مرکز درمانی</label>
+              <input type="text" id="center_name" name="center_name" placeholder="کلینیک، بیمارستان، مطب، شرکت پخش" maxlength="150" required>
+              <p class="form-error" id="center_name-error" hidden></p>
+            </div>
+
+            <div class="form-group" id="email-group">
+              <label for="email">آدرس ایمیل</label>
+              <input type="email" id="email" name="email" placeholder="example@email.com" dir="ltr" required autocomplete="email">
+              <p class="form-error" id="email-error" hidden></p>
+            </div>
+
+            <div class="form-group" id="email-confirm-group">
+              <label for="email_confirm">تکرار آدرس ایمیل</label>
+              <input type="email" id="email_confirm" name="email_confirm" placeholder="example@email.com" dir="ltr" required autocomplete="email">
+              <p class="form-error" id="email_confirm-error" hidden></p>
+            </div>
+
+            <div class="form-group" id="specialty-group">
+              <label for="specialty">تخصص</label>
+              <select id="specialty" name="specialty" required>
+                <option value="" disabled selected>انتخاب کنید</option>
+                <option value="پزشک عمومی">پزشک عمومی</option>
+                <option value="زیبایی، پوست و مو">زیبایی، پوست و مو</option>
+                <option value="جراح زیبایی">جراح زیبایی</option>
+                <option value="شرکت پخش">شرکت پخش</option>
+                <option value="سایر">سایر</option>
+              </select>
+              <p class="form-error" id="specialty-error" hidden></p>
+            </div>
+
+            <div class="form-group form-group--other" id="specialty-other-group" hidden>
+              <label for="specialty_other">تخصص (سایر)</label>
+              <input type="text" id="specialty_other" name="specialty_other" placeholder="تخصص خود را بنویسید" maxlength="150">
+              <p class="form-error" id="specialty_other-error" hidden></p>
+            </div>
+
+            <div class="form-group" id="phone-group">
+              <label for="phone">شماره تماس</label>
+              <input type="tel" id="phone" name="phone" placeholder="09123456789" dir="ltr" inputmode="numeric" maxlength="11" required autocomplete="tel">
+              <p class="form-hint">فقط شماره موبایل ایران (۱۱ رقم، با 09 شروع شود)</p>
+              <p class="form-error" id="phone-error" hidden></p>
+            </div>
+
+            <fieldset class="form-group" id="products-group">
+              <legend>محصول مورد نظر</legend>
+              <p class="form-hint form-hint--fieldset">می‌توانید چند محصول انتخاب کنید</p>
+              <div class="product-chips">
+                <label class="product-chip">
+                  <input type="checkbox" name="products" value="NovaNAD Plus">
+                  <span class="product-chip__text">NovaNAD Plus</span>
+                </label>
+                <label class="product-chip">
+                  <input type="checkbox" name="products" value="PDRN PN CELL">
+                  <span class="product-chip__text">PDRN PN CELL</span>
+                </label>
+                <label class="product-chip">
+                  <input type="checkbox" name="products" value="AGF39 Standard">
+                  <span class="product-chip__text">AGF39 Standard</span>
+                </label>
+              </div>
+              <p class="form-error" id="products-error" hidden></p>
+            </fieldset>
+
+            <div class="form-group" id="message-group">
+              <label for="message">پیام</label>
+              <textarea id="message" name="message" placeholder="توضیحات تکمیلی درباره درخواست شما..." maxlength="300"></textarea>
+              <div class="form-char-count" aria-live="polite"><span id="message-count">0</span> / 300</div>
+              <p class="form-error" id="message-error" hidden></p>
+            </div>
+
+            <button type="submit" class="btn btn--primary btn--full" id="contact-submit">ارسال درخواست</button>
+          </form>
+        </div>
+        <div id="contact-success" class="contact-success" hidden>
+          <div class="contact-success-icon" aria-hidden="true">✓</div>
+          <h3 id="contact-success-title"></h3>
+          <p id="contact-success-lead" class="contact-success-lead"></p>
+          <dl class="contact-success-summary" id="contact-success-summary"></dl>
+          <p class="contact-success-footer">منتظر تماس کارشناس مربوطه از کی‌بیوتی آکادمی باشید.</p>
+        </div>
+      </div>
+
       <aside class="contact-info">
         <h2>راه‌های ارتباطی</h2>
-        <p>برای ثبت‌نام در وبینارها، دریافت اطلاعات محصولات یا همکاری با آکادمی با ما در تماس باشید.</p>
+        <p>برای ثبت‌نام در وبینارها، دریافت اطلاعات محصولات یا همکاری نمایندگی با آکادمی با ما در تماس باشید.</p>
         <div class="contact-links">
           <a href="mailto:info@k-beauty.academy" class="contact-link">
             <span class="icon">✉️</span>
@@ -117,46 +216,6 @@
           </a>
         </div>
       </aside>
-
-      <div class="contact-form-card">
-        <h2>فرم تماس</h2>
-        <div id="contact-form-wrapper">
-          <form id="contact-form" novalidate>
-            <div class="form-group">
-              <label for="name">نام و نام خانوادگی</label>
-              <input type="text" id="name" name="name" placeholder="دکتر ..." required>
-            </div>
-            <div class="form-group">
-              <label for="specialty">تخصص</label>
-              <select id="specialty" name="specialty" required>
-                <option value="" disabled selected>انتخاب کنید</option>
-                <option value="پزشک عمومی">پزشک عمومی</option>
-                <option value="زیبایی، پوست و مو">زیبایی، پوست و مو</option>
-                <option value="جراح زیبایی">جراح زیبایی</option>
-                <option value="سایر">سایر</option>
-              </select>
-            </div>
-            <div class="form-group form-group--other" id="specialty-other-group" hidden>
-              <label for="specialty_other">تخصص (سایر)</label>
-              <input type="text" id="specialty_other" name="specialty_other" placeholder="تخصص خود را بنویسید">
-            </div>
-            <div class="form-group">
-              <label for="phone">شماره تماس</label>
-              <input type="tel" id="phone" name="phone" placeholder="۰۹۱۲..." required>
-            </div>
-            <div class="form-group">
-              <label for="message">پیام</label>
-              <textarea id="message" name="message" placeholder="پیام خود را بنویسید..."></textarea>
-            </div>
-            <button type="submit" class="btn btn--primary btn--full" id="contact-submit">ارسال پیام</button>
-          </form>
-        </div>
-        <div id="contact-success" class="contact-success" hidden>
-          <div class="contact-success-icon" aria-hidden="true">✓</div>
-          <h3>از ثبت درخواست شما سپاسگزاریم</h3>
-          <p>پیام شما با موفقیت دریافت شد. به زودی با شما تماس خواهیم گرفت.</p>
-        </div>
-      </div>
     </div>
   </main>
 
@@ -202,6 +261,6 @@
   </footer>
 
   <script src="analytics.js?v=1"></script>
-  <script src="main.js?v=8"></script>
+  <script src="main.js?v=10"></script>
 </body>
 </html>
