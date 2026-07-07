@@ -911,6 +911,20 @@ p {
   margin: 0 auto;
 }
 
+.page-hero__actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.page-hero__actions .btn {
+  min-width: 12rem;
+}
+
 /* --- Content Blocks --- */
 .content-grid {
   display: grid;

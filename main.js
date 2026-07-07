@@ -24,6 +24,7 @@
     initActiveNav();
     initVerifyForm();
     initContactForm();
+    initProductCatalogDownloads();
     initMobileDock();
     initTelegramDockModal();
     setTelegramLinks();
@@ -540,6 +541,23 @@
     utm.referrer = document.referrer || '';
 
     return utm;
+  }
+
+  /* --- Product Catalog Downloads --- */
+  function initProductCatalogDownloads() {
+    document.querySelectorAll('.product-catalog-btn').forEach(function (link) {
+      link.addEventListener('click', function () {
+        if (!window.kbAnalytics) return;
+
+        var fileName = link.getAttribute('download') || '';
+        if (!fileName) {
+          var parts = (link.getAttribute('href') || '').split('/');
+          fileName = parts[parts.length - 1] || 'catalog.pdf';
+        }
+
+        window.kbAnalytics.trackFileDownload(fileName, link.getAttribute('data-product') || '');
+      });
+    });
   }
 
   /* --- Contact Form --- */
