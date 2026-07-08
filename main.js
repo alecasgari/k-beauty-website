@@ -25,10 +25,112 @@
     initVerifyForm();
     initContactForm();
     initProductCatalogDownloads();
+    initGrowthFactorTooltips();
     initMobileDock();
     initTelegramDockModal();
     setTelegramLinks();
     setTelegramChannelLinks();
+  }
+
+  /* --- Growth Factor Tooltips (AGF39) --- */
+  function initGrowthFactorTooltips() {
+    var container = document.getElementById('growth-factors');
+    var panel = document.getElementById('growth-factor-panel');
+    if (!container || !panel) return;
+
+    var abbrEl = document.getElementById('growth-factor-abbr');
+    var nameEl = document.getElementById('growth-factor-name');
+    var descEl = document.getElementById('growth-factor-desc');
+    var buttons = container.querySelectorAll('[data-factor]');
+    var activeFactor = null;
+
+    var FACTORS = {
+      'VEGF': {
+        abbr: 'Vascular Endothelial Growth Factor',
+        name: 'فاکتور رشد اندوتلیال عروقی',
+        desc: 'رگ‌سازی اطراف فولیکول مو را تحریک می‌کند و خون‌رسانی بهتر به ریشه مو را فراهم می‌آورد.'
+      },
+      'IGF-1': {
+        abbr: 'Insulin-like Growth Factor-1',
+        name: 'فاکتور رشد شبه انسولین نوع ۱',
+        desc: 'فاز رشد مو (آناژن) را طولانی‌تر می‌کند و به تقویت و ضخیم‌تر شدن تار مو کمک می‌کند.'
+      },
+      'FGF-2': {
+        abbr: 'Fibroblast Growth Factor-2',
+        name: 'فاکتور رشد فیبروبلاست نوع ۲',
+        desc: 'تکثیر سلول‌های درم و ترمیم بافت اطراف فولیکول را پشتیبانی می‌کند و محیط رشد مو را بهبود می‌دهد.'
+      },
+      'KGF': {
+        abbr: 'Keratinocyte Growth Factor (FGF-7)',
+        name: 'فاکتور رشد کراتینوسیت',
+        desc: 'به رشد و تمایز سلول‌های اپیتلیال فولیکول کمک می‌کند و در بازسازی پوست و مو نقش دارد.'
+      },
+      'PDGF': {
+        abbr: 'Platelet-Derived Growth Factor',
+        name: 'فاکتور رشد مشتق از پلاکت',
+        desc: 'سلول‌های پشتیبان فولیکول را فعال می‌کند و در ترمیم و تحریک رشد ساختار ریشه مو مؤثر است.'
+      },
+      'TGF-β': {
+        abbr: 'Transforming Growth Factor-Beta',
+        name: 'فاکتور رشد تغییردهنده بتا',
+        desc: 'تنظیم‌کننده مهم چرخه مو و بازسازی بافت است و تعادل سیگنال‌های رشد در فولیکول را حفظ می‌کند.'
+      },
+      'EGF': {
+        abbr: 'Epidermal Growth Factor',
+        name: 'فاکتور رشد اپیدرمی',
+        desc: 'تقسیم و بازسازی سلول‌های پوست و فولیکول را تحریک می‌کند و روند ترمیم و سلامت پوست سر را بهبود می‌دهد.'
+      }
+    };
+
+    function closePanel() {
+      activeFactor = null;
+      panel.hidden = true;
+      buttons.forEach(function (btn) {
+        btn.classList.remove('is-active');
+        btn.setAttribute('aria-expanded', 'false');
+      });
+    }
+
+    function openFactor(factorKey) {
+      var data = FACTORS[factorKey];
+      if (!data) return;
+
+      activeFactor = factorKey;
+      if (abbrEl) abbrEl.textContent = data.abbr;
+      if (nameEl) nameEl.textContent = data.name;
+      if (descEl) descEl.textContent = data.desc;
+      panel.hidden = false;
+
+      buttons.forEach(function (btn) {
+        var isActive = btn.getAttribute('data-factor') === factorKey;
+        btn.classList.toggle('is-active', isActive);
+        btn.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+      });
+    }
+
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var factorKey = btn.getAttribute('data-factor');
+        if (activeFactor === factorKey) {
+          closePanel();
+          return;
+        }
+        openFactor(factorKey);
+      });
+    });
+
+    panel.addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
+
+    document.addEventListener('click', function () {
+      if (activeFactor) closePanel();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && activeFactor) closePanel();
+    });
   }
 
   /* --- Mobile Bottom Dock --- */

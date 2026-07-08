@@ -12,7 +12,7 @@
   <!-- End Google Tag Manager -->
   <meta name="description" content="AGF39 Forte — سایتوکاین تراپی تخصصی مو با ۷ فاکتور رشد برای درمان آلوپسی آندروژنیک">
   <title>AGF39 Forte | K-Beauty Academy</title>
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
   <link rel="icon" href="images/logo/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="images/logo/apple-touch-icon.png">
 </head>
@@ -140,14 +140,34 @@
         <div class="content-grid">
           <div class="content-block">
             <h3>۷ فاکتور رشد اصلی</h3>
-            <div class="ingredient-tags">
-              <span class="ingredient-tag">VEGF</span>
-              <span class="ingredient-tag">IGF-1</span>
-              <span class="ingredient-tag">FGF-2</span>
-              <span class="ingredient-tag">KGF</span>
-              <span class="ingredient-tag">PDGF</span>
-              <span class="ingredient-tag">TGF-β</span>
-              <span class="ingredient-tag">EGF</span>
+            <p class="growth-factors-hint">روی هر فاکتور کلیک کنید تا توضیح کوتاه آن را ببینید</p>
+            <div class="ingredient-tags growth-factors" id="growth-factors">
+              <button type="button" class="ingredient-tag ingredient-tag--interactive" data-factor="VEGF" aria-expanded="false">
+                VEGF<span class="ingredient-tag__hint" aria-hidden="true">+</span>
+              </button>
+              <button type="button" class="ingredient-tag ingredient-tag--interactive" data-factor="IGF-1" aria-expanded="false">
+                IGF-1<span class="ingredient-tag__hint" aria-hidden="true">+</span>
+              </button>
+              <button type="button" class="ingredient-tag ingredient-tag--interactive" data-factor="FGF-2" aria-expanded="false">
+                FGF-2<span class="ingredient-tag__hint" aria-hidden="true">+</span>
+              </button>
+              <button type="button" class="ingredient-tag ingredient-tag--interactive" data-factor="KGF" aria-expanded="false">
+                KGF<span class="ingredient-tag__hint" aria-hidden="true">+</span>
+              </button>
+              <button type="button" class="ingredient-tag ingredient-tag--interactive" data-factor="PDGF" aria-expanded="false">
+                PDGF<span class="ingredient-tag__hint" aria-hidden="true">+</span>
+              </button>
+              <button type="button" class="ingredient-tag ingredient-tag--interactive" data-factor="TGF-β" aria-expanded="false">
+                TGF-β<span class="ingredient-tag__hint" aria-hidden="true">+</span>
+              </button>
+              <button type="button" class="ingredient-tag ingredient-tag--interactive" data-factor="EGF" aria-expanded="false">
+                EGF<span class="ingredient-tag__hint" aria-hidden="true">+</span>
+              </button>
+            </div>
+            <div class="growth-factor-panel" id="growth-factor-panel" hidden role="status" aria-live="polite">
+              <p class="growth-factor-panel__abbr" id="growth-factor-abbr"></p>
+              <p class="growth-factor-panel__name" id="growth-factor-name"></p>
+              <p class="growth-factor-panel__desc" id="growth-factor-desc"></p>
             </div>
             <p style="margin-top:1rem">فاکتورهای رشد با نقش‌های مکمل در تحریک تکثیر سلول‌های بنیادی، آنژیوژنز و تمایز سلولی فولیکول مو.</p>
           </div>
@@ -242,6 +262,6 @@
   </footer>
 
   <script src="analytics.js?v=1"></script>
-  <script src="main.js?v=12"></script>
+  <script src="main.js?v=13"></script>
 </body>
 </html>
