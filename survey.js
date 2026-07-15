@@ -8,10 +8,10 @@
   var SURVEY_WEBHOOK_URL = 'https://n8n.alecasgari.com/webhook/kbeauty-survey';
 
   var params = new URLSearchParams(window.location.search);
-  var surveyId = (params.get('id') || params.get('surveyId') || '').trim();
-  var prefillName = (params.get('name') || '').trim();
-  var chatId = (params.get('cid') || params.get('chatId') || '').trim();
-  var sourceHint = (params.get('src') || params.get('source') || (chatId ? 'telegram' : 'web')).trim();
+  var surveyId = sanitizeParam(params.get('id') || params.get('surveyId') || '');
+  var prefillName = sanitizeIdentityParam(params.get('name') || '');
+  var chatId = sanitizeIdentityParam(params.get('cid') || params.get('chatId') || '');
+  var sourceHint = sanitizeParam(params.get('src') || params.get('source') || '') || (chatId ? 'telegram' : 'web');
 
   var stateEl = document.getElementById('survey-state');
   var modalEl = document.getElementById('survey-thanks-modal');
@@ -26,7 +26,43 @@
       renderMessage('error', 'نظرسنجی نامعتبر', 'شناسه نظرسنجی در لینک مشخص نشده است.');
       return;
     }
+    renderSkeleton();
     loadSurvey();
+  }
+
+  /**
+   * Telegram Inline Keyboard URLs are static. If the bot/n8n left literal
+   * {{name}} / {{chatId}} (or URL-encoded forms) in the link, ignore them.
+   */
+  function sanitizeIdentityParam(raw) {
+    var value = String(raw == null ? '' : raw).trim();
+    if (!value) return '';
+
+    var decoded = value;
+    try {
+      decoded = decodeURIComponent(value).trim();
+    } catch (e) {
+      decoded = value;
+    }
+
+    var normalized = decoded.replace(/\s+/g, '');
+    if (
+      normalized === '{{name}}' ||
+      normalized === '{{chatId}}' ||
+      normalized === '{{chat_id}}' ||
+      normalized === '{{cid}}' ||
+      /^\{\{[a-zA-Z0-9_.]+\}\}$/.test(normalized) ||
+      /^\$\{\{.*\}\}$/.test(normalized) ||
+      /^%7B%7B.+%7D%7D$/i.test(value.replace(/\s+/g, ''))
+    ) {
+      return '';
+    }
+
+    return decoded.replace(/\s+/g, ' ').slice(0, 120);
+  }
+
+  function sanitizeParam(raw) {
+    return String(raw == null ? '' : raw).trim();
   }
 
   function bindModalClose() {
@@ -37,6 +73,25 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && modalEl && !modalEl.hidden) closeThanksModal();
     });
+  }
+
+  function renderSkeleton() {
+    if (!stateEl) return;
+    stateEl.setAttribute('aria-busy', 'true');
+    stateEl.innerHTML =
+      '<div class="survey-skeleton" aria-hidden="true">' +
+        '<div class="sk sk-eyebrow"></div>' +
+        '<div class="sk sk-title"></div>' +
+        '<div class="sk sk-line"></div>' +
+        '<div class="sk sk-line sk-line--short"></div>' +
+        '<div class="sk sk-field"></div>' +
+        '<div class="sk sk-option"></div>' +
+        '<div class="sk sk-option"></div>' +
+        '<div class="sk sk-option"></div>' +
+        '<div class="sk sk-option sk-option--short"></div>' +
+        '<div class="sk sk-button"></div>' +
+      '</div>' +
+      '<p class="sr-only">در حال بارگذاری نظرسنجی...</p>';
   }
 
   function loadSurvey() {
@@ -76,6 +131,7 @@
 
   function renderMessage(type, title, message) {
     if (!stateEl) return;
+    stateEl.removeAttribute('aria-busy');
     stateEl.innerHTML =
       '<div class="survey-status survey-status--' + escapeAttr(type) + '">' +
         '<span class="eyebrow">Survey</span>' +
@@ -87,6 +143,7 @@
 
   function renderSurveyForm(survey) {
     if (!stateEl) return;
+    stateEl.removeAttribute('aria-busy');
     var questions = Array.isArray(survey.questions) ? survey.questions : [];
     if (!questions.length) {
       renderMessage('error', 'نظرسنجی خالی است', 'برای این نظرسنجی هنوز سوالی تعریف نشده است.');
@@ -113,6 +170,9 @@
     html += ' value="' + escapeAttr(prefillName) + '"';
     if (nameLocked) html += ' readonly';
     html += ' placeholder="نام و نام خانوادگی">';
+    if (!nameLocked) {
+      html += '<p class="form-hint">اگر از تلگرام آمده‌اید و نام خالی است، خودتان وارد کنید.</p>';
+    }
     html += '<p class="form-error" id="survey_name-error" hidden></p>';
     html += '</div>';
 
@@ -133,7 +193,6 @@
     });
 
     html += '<button type="submit" class="btn btn--primary btn--full" id="survey-submit">ثبت نظر</button>';
-    html += '<p class="survey-form__hint">با ثبت نظر، به بهبود برنامه‌های آموزشی آکادمی کمک می‌کنید.</p>';
     html += '</form>';
 
     stateEl.innerHTML = html;
@@ -154,9 +213,12 @@
 
     var nameInput = form.querySelector('#survey_name');
     var name = String((nameInput && nameInput.value) || '').replace(/\s+/g, ' ').trim();
-    if (!name) {
+    if (!name || isPlaceholderIdentity(name)) {
       showFieldError('survey_name-error', 'لطفاً نام خود را وارد کنید');
-      if (nameInput) nameInput.focus();
+      if (nameInput) {
+        nameInput.removeAttribute('readonly');
+        nameInput.focus();
+      }
       return;
     }
 
@@ -206,6 +268,10 @@
       setLoading(submitBtn, false);
       alert('خطا در اتصال به سرور. لطفاً دوباره تلاش کنید.');
     });
+  }
+
+  function isPlaceholderIdentity(value) {
+    return !sanitizeIdentityParam(value);
   }
 
   function openThanksModal(name) {

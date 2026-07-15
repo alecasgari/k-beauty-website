@@ -199,6 +199,7 @@
         html += '<button type="button" class="btn btn--ghost" data-status="' + escapeAttr(s.id) + '" data-next="open">باز کردن</button>';
       }
       html += '<button type="button" class="btn btn--ghost" data-copy="' + escapeAttr(s.id) + '">کپی لینک</button>';
+      html += '<button type="button" class="btn btn--ghost" data-copy-tg="' + escapeAttr(s.id) + '">کپی عبارت n8n</button>';
       html += '</div></article>';
     });
     html += '</div>';
@@ -222,6 +223,11 @@
     listEl.querySelectorAll('[data-copy]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         copyText(publicUrl(btn.getAttribute('data-copy')));
+      });
+    });
+    listEl.querySelectorAll('[data-copy-tg]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        onCopyTelegram(btn.getAttribute('data-copy-tg'));
       });
     });
   }
@@ -531,7 +537,15 @@
   }
 
   function telegramTemplate(id) {
-    return SITE_ORIGIN + '/survey.html?id=' + encodeURIComponent(id) + '&name={{name}}&cid={{chatId}}';
+    return (
+      "={{ 'https://k-beauty.academy/survey.html?id=" +
+      id +
+      "&name=' + encodeURIComponent($json.firstName || $json.name || '') + '&cid=' + String($json.chatId || $json.id) }}"
+    );
+  }
+
+  function onCopyTelegram(id) {
+    copyText(telegramTemplate(id));
   }
 
   function copyText(text) {

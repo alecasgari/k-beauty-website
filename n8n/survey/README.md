@@ -187,14 +187,33 @@ Content-Type: application/json
 | صفحه | آدرس |
 |------|------|
 | نظرسنجی عمومی | `https://k-beauty.academy/survey.html?id=webinar-next` |
-| از تلگرام (با محدودیت رأی) | `.../survey.html?id=webinar-next&name=علی&cid=123456789` |
+| شخصی‌سازی‌شده (تلگرام) | `.../survey.html?id=webinar-next&name=علی&cid=123456789` |
 | پنل ادمین | `https://k-beauty.academy/admin/surveys.html` |
 
-قالب پیشنهادی برای ربات تلگرام:
+### مهم: دکمه Inline تلگرام
 
+دکمهٔ **Inline Keyboard با URL** لینک را به‌صورت **ثابت** باز می‌کند.  
+نوشتن `{{name}}` یا `{{chatId}}` داخل URL **جایگزین نمی‌شود** و همان متن خام به مرورگر می‌رود (`%7B%7Bname%7D%7D`).
+
+ربات باید هنگام ساخت دکمه، مقدار واقعی را بگذارد:
+
+**n8n (Expression روی فیلد URL):**
 ```
-https://k-beauty.academy/survey.html?id=webinar-next&name={{name}}&cid={{chatId}}
+={{ 'https://k-beauty.academy/survey.html?id=webinar-next&name=' + encodeURIComponent($json.firstName || $json.name || '') + '&cid=' + String($json.chatId || $json.id) }}
 ```
+
+**Python (مثال aiogram/python-telegram-bot):**
+```python
+from urllib.parse import quote
+
+url = (
+  "https://k-beauty.academy/survey.html"
+  f"?id=webinar-next&name={quote(user_full_name)}&cid={chat_id}"
+)
+# InlineKeyboardButton(text="شرکت در نظرسنجی", url=url)
+```
+
+اگر لینک بدون `name`/`cid` فرستاده شود، صفحه از کاربر نام می‌گیرد؛ فقط محدودیت «یک‌بار رأی با chatId» غیرفعال می‌ماند.
 
 ---
 
