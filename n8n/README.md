@@ -1,4 +1,15 @@
-# K-Beauty — استعلام گواهینامه (n8n)
+# K-Beauty — n8n Workflows
+
+## فهرست
+
+| پوشه / فایل | موضوع |
+|-------------|--------|
+| `kbeauty-certificate-lookup.json` | استعلام گواهینامه |
+| [`survey/`](./survey/) | سیستم نظرسنجی (عمومی + ادمین + Google Sheets) |
+
+---
+
+# استعلام گواهینامه
 
 ## فایل import
 

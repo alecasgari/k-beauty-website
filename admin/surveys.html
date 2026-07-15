@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>پنل نظرسنجی | K-Beauty Academy</title>
+  <link rel="stylesheet" href="../style.css?v=14">
+  <link rel="icon" href="../images/logo/favicon.png" type="image/png">
+</head>
+<body class="survey-admin-page">
+  <header class="survey-admin-topbar">
+    <div class="container survey-admin-topbar__inner">
+      <a href="../index.html" class="logo" aria-label="کی‌بیوتی آکادمی">
+        <img src="../images/logo/logo.png" alt="" class="logo-img" width="36" height="36">
+        <div class="logo-text">
+          <span>پنل نظرسنجی</span>
+          <span>K-Beauty Admin</span>
+        </div>
+      </a>
+      <div class="survey-admin-topbar__actions" id="admin-top-actions" hidden>
+        <span id="admin-user-label" class="survey-admin-user"></span>
+        <button type="button" class="btn btn--outline" id="admin-logout">خروج</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container survey-admin-main">
+    <section id="admin-login-view" class="survey-admin-card">
+      <h1>ورود ادمین</h1>
+      <p class="survey-lead">رمز عبور از شیت <code>Admins</code> خوانده می‌شود.</p>
+      <form id="admin-login-form" class="survey-admin-login" novalidate>
+        <div class="form-group">
+          <label for="admin_password">رمز عبور</label>
+          <input type="password" id="admin_password" name="password" required autocomplete="current-password">
+          <p class="form-error" id="admin_password-error" hidden></p>
+        </div>
+        <button type="submit" class="btn btn--primary btn--full" id="admin-login-submit">ورود</button>
+      </form>
+    </section>
+
+    <section id="admin-app-view" hidden>
+      <div class="survey-admin-toolbar">
+        <div>
+          <h1>مدیریت نظرسنجی‌ها</h1>
+          <p class="survey-lead">ساخت، ویرایش، بستن و مشاهده نتایج</p>
+        </div>
+        <button type="button" class="btn btn--primary" id="admin-new-survey">نظرسنجی جدید</button>
+      </div>
+
+      <div id="admin-list" class="survey-admin-list" aria-live="polite"></div>
+
+      <div id="admin-editor" class="survey-admin-card survey-admin-editor" hidden>
+        <div class="survey-admin-editor__head">
+          <h2 id="editor-title">ویرایش نظرسنجی</h2>
+          <button type="button" class="btn btn--ghost" id="editor-close">بستن</button>
+        </div>
+
+        <form id="survey-editor-form" novalidate>
+          <div class="survey-admin-grid">
+            <div class="form-group">
+              <label for="edit_id">شناسه (لاتین)</label>
+              <input type="text" id="edit_id" name="id" dir="ltr" placeholder="webinar-next" maxlength="64">
+              <p class="form-hint">برای نظرسنجی جدید؛ بعد از ساخت معمولاً ثابت می‌ماند.</p>
+            </div>
+            <div class="form-group">
+              <label for="edit_status">وضعیت</label>
+              <select id="edit_status" name="status">
+                <option value="open">باز (open)</option>
+                <option value="closed">بسته (closed)</option>
+                <option value="draft">پیش‌نویس (draft)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit_title">عنوان</label>
+            <input type="text" id="edit_title" name="title" required maxlength="200">
+          </div>
+
+          <div class="form-group">
+            <label for="edit_description">توضیح</label>
+            <textarea id="edit_description" name="description" rows="2" maxlength="500"></textarea>
+          </div>
+
+          <div class="survey-admin-editor__questions-head">
+            <h3>سوال‌ها</h3>
+            <button type="button" class="btn btn--outline" id="editor-add-question">افزودن سوال</button>
+          </div>
+          <div id="editor-questions"></div>
+
+          <div class="survey-admin-editor__actions">
+            <button type="submit" class="btn btn--primary" id="editor-save">ذخیره نظرسنجی</button>
+            <button type="button" class="btn btn--outline" id="editor-copy-link">کپی لینک عمومی</button>
+          </div>
+          <p id="editor-feedback" class="survey-admin-feedback" hidden></p>
+        </form>
+      </div>
+
+      <div id="admin-results" class="survey-admin-card" hidden>
+        <div class="survey-admin-editor__head">
+          <h2 id="results-title">نتایج</h2>
+          <button type="button" class="btn btn--ghost" id="results-close">بستن</button>
+        </div>
+        <div id="results-body"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="survey-admin.js?v=1"></script>
+</body>
+</html>
