@@ -1,6 +1,6 @@
 /**
  * K-Beauty Academy — Survey Admin Panel
- * Auth + CRUD + results via n8n admin webhook (Google Sheets backend).
+ * Auth + CRUD + results via n8n Data Tables.
  */
 (function () {
   'use strict';
@@ -13,7 +13,6 @@
   var token = sessionStorage.getItem(STORAGE_KEY) || '';
   var adminName = sessionStorage.getItem(STORAGE_NAME) || '';
   var editingSurveyId = null;
-  var surveysCache = [];
 
   var loginView = document.getElementById('admin-login-view');
   var appView = document.getElementById('admin-app-view');
@@ -45,22 +44,16 @@
     if (logoutBtn) logoutBtn.addEventListener('click', logout);
 
     var newBtn = document.getElementById('admin-new-survey');
-    if (newBtn) newBtn.addEventListener('click', function () {
-      openEditor(null);
-    });
+    if (newBtn) newBtn.addEventListener('click', function () { openEditor(null); });
 
     var closeEditor = document.getElementById('editor-close');
     if (closeEditor) closeEditor.addEventListener('click', hideEditor);
 
     var closeResults = document.getElementById('results-close');
-    if (closeResults) closeResults.addEventListener('click', function () {
-      resultsEl.hidden = true;
-    });
+    if (closeResults) closeResults.addEventListener('click', function () { resultsEl.hidden = true; });
 
     var addQ = document.getElementById('editor-add-question');
-    if (addQ) addQ.addEventListener('click', function () {
-      addQuestionBlock();
-    });
+    if (addQ) addQ.addEventListener('click', function () { addQuestionBlock(); });
 
     var editorForm = document.getElementById('survey-editor-form');
     if (editorForm) editorForm.addEventListener('submit', onSave);
@@ -97,15 +90,9 @@
     var input = document.getElementById('admin_password');
     var err = document.getElementById('admin_password-error');
     var password = String((input && input.value) || '').trim();
-    if (err) {
-      err.hidden = true;
-      err.textContent = '';
-    }
+    if (err) { err.hidden = true; err.textContent = ''; }
     if (!password) {
-      if (err) {
-        err.hidden = false;
-        err.textContent = 'رمز عبور را وارد کنید';
-      }
+      if (err) { err.hidden = false; err.textContent = 'رمز عبور را وارد کنید'; }
       return;
     }
 
@@ -115,10 +102,7 @@
     api({ action: 'login', password: password }).then(function (data) {
       setBtnLoading(btn, false, 'ورود...', 'ورود');
       if (!data || !data.ok || !data.token) {
-        if (err) {
-          err.hidden = false;
-          err.textContent = (data && data.message) || 'ورود ناموفق بود';
-        }
+        if (err) { err.hidden = false; err.textContent = (data && data.message) || 'ورود ناموفق بود'; }
         return;
       }
       token = data.token;
@@ -129,10 +113,7 @@
       refreshList();
     }).catch(function () {
       setBtnLoading(btn, false, 'ورود...', 'ورود');
-      if (err) {
-        err.hidden = false;
-        err.textContent = 'خطا در اتصال به سرور';
-      }
+      if (err) { err.hidden = false; err.textContent = 'خطا در اتصال به سرور'; }
     });
   }
 
@@ -161,15 +142,11 @@
     if (listEl) listEl.innerHTML = '<p class="survey-admin-muted">در حال بارگذاری...</p>';
     api({ action: 'list', token: token }).then(function (data) {
       if (!data || !data.ok) {
-        if (data && data.code === 'UNAUTHORIZED') {
-          logout();
-          return;
-        }
+        if (data && data.code === 'UNAUTHORIZED') { logout(); return; }
         listEl.innerHTML = '<p class="survey-admin-error">' + escapeHtml((data && data.message) || 'خطا') + '</p>';
         return;
       }
-      surveysCache = data.surveys || [];
-      renderList(surveysCache);
+      renderList(data.surveys || []);
     }).catch(function () {
       listEl.innerHTML = '<p class="survey-admin-error">خطا در اتصال به سرور</p>';
     });
@@ -205,24 +182,16 @@
     listEl.innerHTML = html;
 
     listEl.querySelectorAll('[data-edit]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        loadAndEdit(btn.getAttribute('data-edit'));
-      });
+      btn.addEventListener('click', function () { loadAndEdit(btn.getAttribute('data-edit')); });
     });
     listEl.querySelectorAll('[data-results]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        loadResults(btn.getAttribute('data-results'));
-      });
+      btn.addEventListener('click', function () { loadResults(btn.getAttribute('data-results')); });
     });
     listEl.querySelectorAll('[data-status]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        setStatus(btn.getAttribute('data-status'), btn.getAttribute('data-next'));
-      });
+      btn.addEventListener('click', function () { setStatus(btn.getAttribute('data-status'), btn.getAttribute('data-next')); });
     });
     listEl.querySelectorAll('[data-copy]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        copyText(publicUrl(btn.getAttribute('data-copy')));
-      });
+      btn.addEventListener('click', function () { copyText(publicUrl(btn.getAttribute('data-copy'))); });
     });
   }
 
@@ -269,9 +238,7 @@
         ]
       });
     } else {
-      qs.forEach(function (q) {
-        addQuestionBlock(q);
-      });
+      qs.forEach(function (q) { addQuestionBlock(q); });
     }
 
     editorEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -319,9 +286,7 @@
     questionsEl.appendChild(block);
     var optsWrap = block.querySelector('.editor-options');
     var opts = Array.isArray(data.options) ? data.options : [{ text: '' }, { text: '' }];
-    opts.forEach(function (o) {
-      optsWrap.appendChild(createOptionRow(o));
-    });
+    opts.forEach(function (o) { optsWrap.appendChild(createOptionRow(o)); });
     renumberQuestions();
   }
 
@@ -337,8 +302,7 @@
   }
 
   function renumberQuestions() {
-    var blocks = questionsEl.querySelectorAll('.editor-question');
-    blocks.forEach(function (block, i) {
+    questionsEl.querySelectorAll('.editor-question').forEach(function (block, i) {
       var label = block.querySelector('.editor-question__label');
       if (label) label.textContent = 'سوال ' + toFaDigit(i + 1);
     });
@@ -360,50 +324,25 @@
         var oText = String(row.querySelector('.editor-o-text').value || '').trim();
         var oId = String(row.querySelector('.editor-o-id').value || '').trim();
         if (!oText) return;
-        options.push({
-          id: oId || undefined,
-          text: oText,
-          sortOrder: oi + 1
-        });
+        options.push({ id: oId || undefined, text: oText, sortOrder: oi + 1 });
       });
       if (!qText || options.length < 2) return;
-      questions.push({
-        id: qId || undefined,
-        text: qText,
-        sortOrder: qi + 1,
-        options: options
-      });
+      questions.push({ id: qId || undefined, text: qText, sortOrder: qi + 1, options: options });
     });
 
-    return {
-      id: id || undefined,
-      title: title,
-      description: description,
-      status: status,
-      questions: questions
-    };
+    return { id: id || undefined, title: title, description: description, status: status, questions: questions };
   }
 
   function onSave(e) {
     e.preventDefault();
     var survey = collectEditorSurvey();
-    if (!survey.title) {
-      showFeedback('عنوان الزامی است', true);
-      return;
-    }
-    if (!survey.questions.length) {
-      showFeedback('حداقل یک سوال با دو گزینه لازم است', true);
-      return;
-    }
+    if (!survey.title) { showFeedback('عنوان الزامی است', true); return; }
+    if (!survey.questions.length) { showFeedback('حداقل یک سوال با دو گزینه لازم است', true); return; }
 
     var btn = document.getElementById('editor-save');
     setBtnLoading(btn, true, 'در حال ذخیره...', 'ذخیره نظرسنجی');
 
-    api({
-      action: 'save',
-      token: token,
-      survey: survey
-    }).then(function (data) {
+    api({ action: 'save', token: token, survey: survey }).then(function (data) {
       setBtnLoading(btn, false, 'در حال ذخیره...', 'ذخیره نظرسنجی');
       if (!data || !data.ok) {
         if (data && data.code === 'UNAUTHORIZED') return logout();
@@ -422,12 +361,7 @@
   }
 
   function setStatus(id, status) {
-    api({
-      action: 'setStatus',
-      token: token,
-      surveyId: id,
-      status: status
-    }).then(function (data) {
+    api({ action: 'setStatus', token: token, surveyId: id, status: status }).then(function (data) {
       if (!data || !data.ok) {
         if (data && data.code === 'UNAUTHORIZED') return logout();
         alert((data && data.message) || 'به‌روزرسانی وضعیت ناموفق بود');
@@ -501,11 +435,7 @@
 
   function renderAnswerLabels(answersText) {
     var parsed = {};
-    try {
-      parsed = JSON.parse(answersText || '{}');
-    } catch (e) {
-      return '<li>پاسخ قابل نمایش نیست</li>';
-    }
+    try { parsed = JSON.parse(answersText || '{}'); } catch (e) { return '<li>پاسخ قابل نمایش نیست</li>'; }
     var keys = Object.keys(parsed);
     if (!keys.length) return '<li>—</li>';
     return keys.map(function (k) {
@@ -566,11 +496,7 @@
 
   function formatDate(iso) {
     if (!iso) return '—';
-    try {
-      return new Date(iso).toLocaleString('fa-IR');
-    } catch (e) {
-      return iso;
-    }
+    try { return new Date(iso).toLocaleString('fa-IR'); } catch (e) { return iso; }
   }
 
   function setBtnLoading(btn, loading, loadingText, idleText) {
@@ -597,6 +523,5 @@
     });
   }
 
-  // Expose template helper for console debugging if needed
   window.kbSurveyAdminPublicUrl = publicUrl;
 })();
