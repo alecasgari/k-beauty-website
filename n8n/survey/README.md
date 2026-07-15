@@ -50,7 +50,7 @@ https://n8n.alecasgari.com/webhook/kbeauty-survey-admin
 `id` | `questionId` | `surveyId` | `text` | `sortOrder` | `active`
 
 ### Responses
-`id` | `surveyId` | `name` | `source` | `answersJson` | `answersText` | `submittedAt`
+`id` | `surveyId` | `name` (اختیاری/خالی) | `source` | `answersJson` | `answersText` | `submittedAt`
 
 > محدودیت رأی تکراری نداریم؛ چندبار رأی دادن مجاز است.
 
@@ -72,7 +72,7 @@ https://n8n.alecasgari.com/webhook/kbeauty-survey-admin
 ```
 https://k-beauty.academy/survey.html?id=webinar-next
 ```
-نام را خود مخاطب در فرم وارد می‌کند.
+فرم نام/شناسه تلگرام نمی‌پرسد؛ رأی‌ها ناشناس‌اند.
 
 ---
 
@@ -80,7 +80,7 @@ https://k-beauty.academy/survey.html?id=webinar-next
 
 ### عمومی — `kbeauty-survey`
 - `{ "action": "get", "surveyId": "webinar-next" }`
-- `{ "action": "submit", "surveyId": "...", "name": "...", "source": "telegram", "answers": { "q_id": "opt_id" } }`
+- `{ "action": "submit", "surveyId": "...", "source": "telegram", "answers": { "q_id": "opt_id" } }`
 
 ### ادمین — `kbeauty-survey-admin`
 `login` | `list` | `get` | `save` | `setStatus` | `results`  

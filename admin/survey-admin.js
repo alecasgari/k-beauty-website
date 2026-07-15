@@ -1,6 +1,6 @@
 /**
  * K-Beauty Academy — Survey Admin Panel
- * Auth + CRUD + results via n8n Data Tables.
+ * Tabbed UI: list / editor / results via n8n Data Tables.
  */
 (function () {
   'use strict';
@@ -13,16 +13,19 @@
   var token = sessionStorage.getItem(STORAGE_KEY) || '';
   var adminName = sessionStorage.getItem(STORAGE_NAME) || '';
   var editingSurveyId = null;
+  var resultsSurveyId = null;
+  var activeTab = 'list';
 
   var loginView = document.getElementById('admin-login-view');
   var appView = document.getElementById('admin-app-view');
   var topActions = document.getElementById('admin-top-actions');
   var userLabel = document.getElementById('admin-user-label');
   var listEl = document.getElementById('admin-list');
-  var editorEl = document.getElementById('admin-editor');
-  var resultsEl = document.getElementById('admin-results');
   var questionsEl = document.getElementById('editor-questions');
   var feedbackEl = document.getElementById('editor-feedback');
+  var resultsBody = document.getElementById('results-body');
+  var resultsEmpty = document.getElementById('results-empty');
+  var resultsRefresh = document.getElementById('results-refresh');
 
   document.addEventListener('DOMContentLoaded', init);
 
@@ -30,6 +33,7 @@
     bindEvents();
     if (token) {
       showApp();
+      switchTab('list');
       refreshList();
     } else {
       showLogin();
@@ -44,13 +48,23 @@
     if (logoutBtn) logoutBtn.addEventListener('click', logout);
 
     var newBtn = document.getElementById('admin-new-survey');
-    if (newBtn) newBtn.addEventListener('click', function () { openEditor(null); });
+    if (newBtn) {
+      newBtn.addEventListener('click', function () {
+        openEditor(null);
+      });
+    }
 
-    var closeEditor = document.getElementById('editor-close');
-    if (closeEditor) closeEditor.addEventListener('click', hideEditor);
+    document.querySelectorAll('.survey-admin-tab').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        switchTab(tab.getAttribute('data-tab'));
+      });
+    });
 
-    var closeResults = document.getElementById('results-close');
-    if (closeResults) closeResults.addEventListener('click', function () { resultsEl.hidden = true; });
+    if (resultsRefresh) {
+      resultsRefresh.addEventListener('click', function () {
+        if (resultsSurveyId) loadResults(resultsSurveyId);
+      });
+    }
 
     var addQ = document.getElementById('editor-add-question');
     if (addQ) addQ.addEventListener('click', function () { addQuestionBlock(); });
@@ -85,6 +99,19 @@
     }
   }
 
+  function switchTab(tab) {
+    activeTab = tab || 'list';
+    document.querySelectorAll('.survey-admin-tab').forEach(function (btn) {
+      btn.classList.toggle('is-active', btn.getAttribute('data-tab') === activeTab);
+    });
+    document.querySelectorAll('.survey-admin-tabpanel').forEach(function (panel) {
+      var id = 'tab-' + activeTab;
+      var on = panel.id === id;
+      panel.hidden = !on;
+      panel.classList.toggle('is-active', on);
+    });
+  }
+
   function onLogin(e) {
     e.preventDefault();
     var input = document.getElementById('admin_password');
@@ -110,6 +137,7 @@
       sessionStorage.setItem(STORAGE_KEY, token);
       sessionStorage.setItem(STORAGE_NAME, adminName);
       showApp();
+      switchTab('list');
       refreshList();
     }).catch(function () {
       setBtnLoading(btn, false, 'ورود...', 'ورود');
@@ -120,6 +148,8 @@
   function logout() {
     token = '';
     adminName = '';
+    editingSurveyId = null;
+    resultsSurveyId = null;
     sessionStorage.removeItem(STORAGE_KEY);
     sessionStorage.removeItem(STORAGE_NAME);
     showLogin();
@@ -155,7 +185,13 @@
   function renderList(surveys) {
     if (!listEl) return;
     if (!surveys.length) {
-      listEl.innerHTML = '<div class="survey-admin-empty">هنوز نظرسنجی‌ای نیست. «نظرسنجی جدید» را بزنید.</div>';
+      listEl.innerHTML =
+        '<div class="survey-admin-empty-card">' +
+          '<p class="survey-admin-empty">هنوز نظرسنجی‌ای نیست.</p>' +
+          '<button type="button" class="btn btn--primary" id="list-create-first">ساخت اولین نظرسنجی</button>' +
+        '</div>';
+      var createBtn = document.getElementById('list-create-first');
+      if (createBtn) createBtn.addEventListener('click', function () { openEditor(null); });
       return;
     }
 
@@ -163,13 +199,16 @@
     surveys.forEach(function (s) {
       html += '<article class="survey-admin-row">';
       html += '<div class="survey-admin-row__main">';
+      html += '<div class="survey-admin-row__title-line">';
       html += '<h3>' + escapeHtml(s.title) + '</h3>';
-      html += '<p><code dir="ltr">' + escapeHtml(s.id) + '</code> · ' + statusLabel(s.status);
-      html += ' · ' + toFaDigit(s.responseCount || 0) + ' پاسخ</p>';
+      html += '<span class="survey-status-badge survey-status-badge--' + escapeAttr(s.status || 'draft') + '">' + statusLabel(s.status) + '</span>';
+      html += '</div>';
+      html += '<p><code dir="ltr">' + escapeHtml(s.id) + '</code>';
+      html += ' · <strong>' + toFaDigit(s.responseCount || 0) + '</strong> پاسخ</p>';
       html += '</div>';
       html += '<div class="survey-admin-row__actions">';
       html += '<button type="button" class="btn btn--outline" data-edit="' + escapeAttr(s.id) + '">ویرایش</button>';
-      html += '<button type="button" class="btn btn--outline" data-results="' + escapeAttr(s.id) + '">نتایج</button>';
+      html += '<button type="button" class="btn btn--primary" data-results="' + escapeAttr(s.id) + '">نتایج</button>';
       if (s.status === 'open') {
         html += '<button type="button" class="btn btn--ghost" data-status="' + escapeAttr(s.id) + '" data-next="closed">بستن</button>';
       } else {
@@ -196,9 +235,8 @@
   }
 
   function openEditor(survey) {
-    hideResults();
-    editorEl.hidden = false;
-    feedbackEl.hidden = true;
+    switchTab('editor');
+    if (feedbackEl) feedbackEl.hidden = true;
     editingSurveyId = survey ? survey.id : null;
 
     document.getElementById('editor-title').textContent = survey ? 'ویرایش نظرسنجی' : 'نظرسنجی جدید';
@@ -241,16 +279,7 @@
       qs.forEach(function (q) { addQuestionBlock(q); });
     }
 
-    editorEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  function hideEditor() {
-    editorEl.hidden = true;
-    editingSurveyId = null;
-  }
-
-  function hideResults() {
-    resultsEl.hidden = true;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function loadAndEdit(id) {
@@ -374,39 +403,82 @@
   }
 
   function loadResults(id) {
-    hideEditor();
-    resultsEl.hidden = false;
-    document.getElementById('results-body').innerHTML = '<p class="survey-admin-muted">در حال بارگذاری نتایج...</p>';
-    resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    resultsSurveyId = id;
+    switchTab('results');
+    if (resultsEmpty) resultsEmpty.hidden = true;
+    if (resultsBody) {
+      resultsBody.hidden = false;
+      resultsBody.innerHTML = '<p class="survey-admin-muted">در حال بارگذاری نتایج...</p>';
+    }
+    if (resultsRefresh) resultsRefresh.hidden = false;
 
     api({ action: 'results', token: token, surveyId: id }).then(function (data) {
       if (!data || !data.ok) {
         if (data && data.code === 'UNAUTHORIZED') return logout();
-        document.getElementById('results-body').innerHTML =
-          '<p class="survey-admin-error">' + escapeHtml((data && data.message) || 'خطا') + '</p>';
+        if (resultsBody) {
+          resultsBody.innerHTML =
+            '<p class="survey-admin-error">' + escapeHtml((data && data.message) || 'خطا') + '</p>';
+        }
         return;
       }
       renderResults(data);
     }).catch(function () {
-      document.getElementById('results-body').innerHTML =
-        '<p class="survey-admin-error">خطا در اتصال به سرور</p>';
+      if (resultsBody) {
+        resultsBody.innerHTML = '<p class="survey-admin-error">خطا در اتصال به سرور</p>';
+      }
     });
+  }
+
+  function pickWinner(options) {
+    if (!options || !options.length) return null;
+    var best = options[0];
+    for (var i = 1; i < options.length; i++) {
+      if (Number(options[i].count || 0) > Number(best.count || 0)) best = options[i];
+    }
+    if (!Number(best.count || 0)) return null;
+    return best;
   }
 
   function renderResults(data) {
     document.getElementById('results-title').textContent =
       'نتایج: ' + ((data.survey && data.survey.title) || '');
 
-    var html = '';
-    html += '<p class="survey-lead">مجموع پاسخ‌ها: <strong>' + toFaDigit(data.totalResponses || 0) + '</strong></p>';
+    var total = data.totalResponses || 0;
+    var questions = data.questions || [];
+    var winners = questions.map(function (q, qi) {
+      return { index: qi, question: q.text, winner: pickWinner(q.options || []) };
+    }).filter(function (w) { return w.winner; });
 
-    (data.questions || []).forEach(function (q, qi) {
+    var html = '';
+    html += '<div class="results-kpis">';
+    html += '<div class="results-kpi"><span class="results-kpi__label">کل پاسخ‌ها</span><strong class="results-kpi__value">' + toFaDigit(total) + '</strong></div>';
+    html += '<div class="results-kpi"><span class="results-kpi__label">تعداد سوال</span><strong class="results-kpi__value">' + toFaDigit(questions.length) + '</strong></div>';
+    html += '<div class="results-kpi"><span class="results-kpi__label">وضعیت</span><strong class="results-kpi__value">' + escapeHtml(statusLabel(data.survey && data.survey.status)) + '</strong></div>';
+    html += '</div>';
+
+    if (winners.length) {
+      html += '<div class="results-winners">';
+      html += '<h3>گزینهٔ برتر هر سوال</h3>';
+      html += '<ul class="results-winners__list">';
+      winners.forEach(function (w) {
+        html += '<li>';
+        html += '<span class="results-winners__q">' + toFaDigit(w.index + 1) + '. ' + escapeHtml(w.question) + '</span>';
+        html += '<span class="results-winners__a">' + escapeHtml(w.winner.text);
+        html += ' <em>(' + toFaDigit(w.winner.count) + ' — ' + toFaDigit(w.winner.percent) + '٪)</em></span>';
+        html += '</li>';
+      });
+      html += '</ul></div>';
+    }
+
+    questions.forEach(function (q, qi) {
+      var top = pickWinner(q.options || []);
       html += '<div class="results-question">';
       html += '<h3>' + toFaDigit(qi + 1) + '. ' + escapeHtml(q.text) + '</h3>';
       html += '<ul class="results-bars">';
       (q.options || []).forEach(function (o) {
-        html += '<li>';
-        html += '<div class="results-bars__label"><span>' + escapeHtml(o.text) + '</span>';
+        var isTop = top && top.id === o.id;
+        html += '<li' + (isTop ? ' class="is-winner"' : '') + '>';
+        html += '<div class="results-bars__label"><span>' + escapeHtml(o.text) + (isTop ? ' ★' : '') + '</span>';
         html += '<span>' + toFaDigit(o.count) + ' (' + toFaDigit(o.percent) + '٪)</span></div>';
         html += '<div class="results-bars__track"><span style="width:' + Math.min(100, Number(o.percent) || 0) + '%"></span></div>';
         html += '</li>';
@@ -419,9 +491,9 @@
       html += '<p class="survey-admin-muted">هنوز پاسخی ثبت نشده است.</p>';
     } else {
       html += '<div class="results-raw">';
-      data.responses.forEach(function (r) {
+      data.responses.forEach(function (r, idx) {
         html += '<article class="results-raw__item">';
-        html += '<header><strong>' + escapeHtml(r.name || '—') + '</strong>';
+        html += '<header><strong>پاسخ ' + toFaDigit(idx + 1) + '</strong>';
         html += '<span>' + escapeHtml(formatDate(r.submittedAt)) + '</span></header>';
         html += '<p class="results-raw__meta">منبع: ' + escapeHtml(r.source || '—') + '</p>';
         html += '<ul>' + renderAnswerLabels(r.answersText) + '</ul>';
@@ -430,7 +502,11 @@
       html += '</div>';
     }
 
-    document.getElementById('results-body').innerHTML = html;
+    if (resultsEmpty) resultsEmpty.hidden = true;
+    if (resultsBody) {
+      resultsBody.hidden = false;
+      resultsBody.innerHTML = html;
+    }
   }
 
   function renderAnswerLabels(answersText) {
@@ -522,6 +598,4 @@
       return '۰۱۲۳۴۵۶۷۸۹'[Number(d)];
     });
   }
-
-  window.kbSurveyAdminPublicUrl = publicUrl;
 })();

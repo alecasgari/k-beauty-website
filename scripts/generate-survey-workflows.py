@@ -132,9 +132,6 @@ try {
     if (!surveyId) {
       return [{ json: { ok: false, code: 'MISSING_ID', message: 'شناسه نظرسنجی مشخص نشده است', doAppend: false } }];
     }
-    if (!name) {
-      return [{ json: { ok: false, code: 'MISSING_NAME', message: 'لطفاً نام خود را وارد کنید', doAppend: false } }];
-    }
 
     const survey = surveys.find(s => String(s.id).trim() === surveyId);
     if (!survey) {
@@ -175,7 +172,7 @@ try {
       appendRow: {
         id: responseId,
         surveyId,
-        name,
+        name: name || '',
         source,
         answersJson: JSON.stringify(normalized),
         answersText: JSON.stringify(labels),
@@ -185,7 +182,6 @@ try {
         ok: true,
         code: 'SUBMITTED',
         message: 'نظر شما با موفقیت ثبت شد',
-        name,
         responseId
       }
     } }];

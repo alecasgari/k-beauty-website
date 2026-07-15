@@ -1,6 +1,7 @@
 /**
  * K-Beauty Academy — Public Survey Page
  * Loads survey from n8n Data Tables via webhook and submits responses.
+ * No name / chatId — anonymous votes only.
  */
 (function () {
   'use strict';
@@ -13,7 +14,6 @@
 
   var stateEl = document.getElementById('survey-state');
   var modalEl = document.getElementById('survey-thanks-modal');
-  var thanksTextEl = document.getElementById('survey-thanks-text');
   var currentSurvey = null;
 
   document.addEventListener('DOMContentLoaded', init);
@@ -48,7 +48,6 @@
         '<div class="sk sk-title"></div>' +
         '<div class="sk sk-line"></div>' +
         '<div class="sk sk-line sk-line--short"></div>' +
-        '<div class="sk sk-field"></div>' +
         '<div class="sk sk-option"></div>' +
         '<div class="sk sk-option"></div>' +
         '<div class="sk sk-option"></div>' +
@@ -125,12 +124,6 @@
     html += '<input type="text" id="survey_website" name="website" tabindex="-1" autocomplete="off">';
     html += '</div>';
 
-    html += '<div class="form-group" id="survey-name-group">';
-    html += '<label for="survey_name">نام شما</label>';
-    html += '<input type="text" id="survey_name" name="name" maxlength="120" required autocomplete="name" placeholder="نام و نام خانوادگی">';
-    html += '<p class="form-error" id="survey_name-error" hidden></p>';
-    html += '</div>';
-
     questions.forEach(function (q, index) {
       html += '<fieldset class="survey-question" data-question-id="' + escapeAttr(q.id) + '">';
       html += '<legend><span class="survey-question__index">' + toFaDigit(index + 1) + '</span> ' + escapeHtml(q.text) + '</legend>';
@@ -164,14 +157,6 @@
     var honeypot = (form.querySelector('[name="website"]') || {}).value || '';
     if (String(honeypot).trim()) return;
 
-    var nameInput = form.querySelector('#survey_name');
-    var name = String((nameInput && nameInput.value) || '').replace(/\s+/g, ' ').trim();
-    if (!name) {
-      showFieldError('survey_name-error', 'لطفاً نام خود را وارد کنید');
-      if (nameInput) nameInput.focus();
-      return;
-    }
-
     if (!currentSurvey || !Array.isArray(currentSurvey.questions)) return;
 
     var answers = {};
@@ -198,7 +183,6 @@
     postWebhook({
       action: 'submit',
       surveyId: surveyId,
-      name: name,
       source: sourceHint,
       answers: answers
     }).then(function (data) {
@@ -207,7 +191,7 @@
         alert((data && data.message) || 'ثبت نظر با خطا مواجه شد.');
         return;
       }
-      openThanksModal(data.name || name);
+      openThanksModal();
       renderMessage('success', 'ثبت شد', 'از مشارکت شما سپاسگزاریم.');
     }).catch(function () {
       setLoading(submitBtn, false);
@@ -215,9 +199,8 @@
     });
   }
 
-  function openThanksModal(name) {
-    if (!modalEl || !thanksTextEl) return;
-    thanksTextEl.textContent = name + ' عزیز، نظرت ثبت شد. مرسی از همراهی‌ات.';
+  function openThanksModal() {
+    if (!modalEl) return;
     modalEl.hidden = false;
     document.body.classList.add('survey-modal-open');
     var btn = modalEl.querySelector('[data-survey-modal-close]');
@@ -250,15 +233,6 @@
     form.querySelectorAll('.is-invalid').forEach(function (el) {
       el.classList.remove('is-invalid');
     });
-  }
-
-  function showFieldError(id, message) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    el.hidden = false;
-    el.textContent = message;
-    var group = el.closest('.form-group');
-    if (group) group.classList.add('is-invalid');
   }
 
   function showQuestionError(qid, message) {

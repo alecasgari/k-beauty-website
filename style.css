@@ -3600,8 +3600,176 @@ body.survey-modal-open {
   margin-bottom: 1.25rem;
 }
 
+.survey-admin-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+  padding: 0.3rem;
+  background: var(--white-pure);
+  border: 1px solid var(--silver-light);
+  border-radius: var(--radius-md);
+}
+
+.survey-admin-tab {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.7rem 0.85rem;
+  border-radius: calc(var(--radius-md) - 2px);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.survey-admin-tab:hover {
+  color: var(--text-primary);
+  background: rgba(91, 53, 143, 0.06);
+}
+
+.survey-admin-tab.is-active {
+  background: var(--purple-elegant);
+  color: #fff;
+}
+
+.survey-admin-tabpanel[hidden] {
+  display: none !important;
+}
+
 .survey-admin-list {
   margin-bottom: 1.5rem;
+}
+
+.survey-admin-empty-card {
+  background: var(--white-pure);
+  border: 1px dashed var(--silver-light);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.survey-admin-row__title-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.survey-admin-row__title-line h3 {
+  margin: 0;
+}
+
+.survey-status-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--silver-light);
+  color: var(--text-secondary);
+}
+
+.survey-status-badge--open {
+  background: rgba(5, 150, 105, 0.12);
+  color: var(--success);
+}
+
+.survey-status-badge--closed {
+  background: rgba(185, 28, 28, 0.1);
+  color: var(--error);
+}
+
+.survey-status-badge--draft {
+  background: rgba(91, 53, 143, 0.1);
+  color: var(--purple-elegant);
+}
+
+.results-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0.5rem 0 1.25rem;
+}
+
+.results-kpi {
+  background: linear-gradient(180deg, #faf8fc 0%, #fff 100%);
+  border: 1px solid var(--silver-light);
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1rem;
+}
+
+.results-kpi__label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.results-kpi__value {
+  font-size: 1.25rem;
+  color: var(--purple-elegant);
+}
+
+.results-winners {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.1rem;
+  background: rgba(91, 53, 143, 0.04);
+  border: 1px solid rgba(91, 53, 143, 0.12);
+  border-radius: var(--radius-md);
+}
+
+.results-winners h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  color: var(--purple-elegant);
+}
+
+.results-winners__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.results-winners__list li {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.results-winners__q {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.results-winners__a {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.results-winners__a em {
+  font-style: normal;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.results-bars li.is-winner .results-bars__label span:first-child {
+  color: var(--purple-elegant);
+  font-weight: 700;
+}
+
+.results-bars li.is-winner .results-bars__track span {
+  background: linear-gradient(90deg, var(--purple-elegant), var(--purple-accent));
+}
+
+@media (max-width: 640px) {
+  .results-kpis {
+    grid-template-columns: 1fr;
+  }
 }
 
 .survey-admin-table {
