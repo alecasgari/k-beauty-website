@@ -1535,10 +1535,16 @@ p {
 
 .form-honeypot {
   position: absolute;
-  left: -10000px;
   width: 1px;
   height: 1px;
+  padding: 0;
+  margin: -1px;
   overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+  /* Do NOT use left:-10000px — expands scroll width on mobile RTL */
 }
 
 .form-hint {
@@ -3237,15 +3243,21 @@ body.telegram-dock-modal-open {
     radial-gradient(900px 420px at 100% -10%, rgba(124, 92, 191, 0.1), transparent 55%),
     radial-gradient(700px 360px at 0% 18%, rgba(30, 45, 74, 0.05), transparent 50%),
     var(--white-clinical);
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 .survey-section {
   padding: calc(var(--header-height) + 1.25rem) 0 2.5rem;
   min-height: auto;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .survey-shell {
   max-width: 640px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .survey-card {
@@ -3254,6 +3266,10 @@ body.telegram-dock-modal-open {
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   padding: 1.25rem 1rem 1.35rem;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: clip;
+  min-width: 0;
 }
 
 @media (min-width: 768px) {
@@ -3366,6 +3382,12 @@ body.telegram-dock-modal-open {
   color: var(--success);
 }
 
+.survey-form {
+  position: relative;
+  max-width: 100%;
+  min-width: 0;
+}
+
 .survey-form .form-group {
   margin-bottom: 0.85rem;
 }
@@ -3378,6 +3400,8 @@ body.telegram-dock-modal-open {
 .survey-form .form-group input {
   padding: 0.65rem 0.75rem;
   font-size: 0.95rem;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .survey-form .form-hint {
@@ -3389,14 +3413,24 @@ body.telegram-dock-modal-open {
   border: 0;
   margin: 0 0 0.95rem;
   padding: 0;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .survey-question legend {
+  display: block;
+  float: none;
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
   font-weight: 600;
   font-size: 0.95rem;
   color: var(--text-primary);
   margin-bottom: 0.55rem;
   line-height: 1.5;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .survey-question__index {
@@ -3410,11 +3444,15 @@ body.telegram-dock-modal-open {
   background: var(--purple-elegant);
   color: #fff;
   font-size: 0.72rem;
+  flex-shrink: 0;
+  vertical-align: middle;
 }
 
 .survey-options {
   display: grid;
   gap: 0.45rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .survey-option {
@@ -3427,6 +3465,9 @@ body.telegram-dock-modal-open {
   background: var(--white-pure);
   cursor: pointer;
   transition: border-color var(--transition), background var(--transition);
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .survey-option:hover {
@@ -3448,9 +3489,12 @@ body.telegram-dock-modal-open {
 
 .survey-option__text {
   flex: 1;
+  min-width: 0;
   line-height: 1.5;
   font-size: 0.92rem;
   color: var(--text-primary);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .survey-question.is-invalid .survey-option {
@@ -3460,6 +3504,8 @@ body.telegram-dock-modal-open {
 .survey-form .btn--full {
   margin-top: 0.15rem;
   padding: 0.7rem 1rem;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .survey-modal {
