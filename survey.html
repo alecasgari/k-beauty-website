@@ -13,7 +13,7 @@
   <meta name="description" content="ثبت نظر مخاطبان K-Beauty Academy درباره وبینارها و برنامه‌های آموزشی">
   <meta name="robots" content="noindex,nofollow">
   <title>نظرسنجی | K-Beauty Academy</title>
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
   <link rel="icon" href="images/logo/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="images/logo/apple-touch-icon.png">
 </head>
@@ -66,11 +66,20 @@
   <main>
     <section class="survey-section">
       <div class="container survey-shell">
-        <div id="survey-state" class="survey-card" aria-live="polite">
-          <div class="survey-loading">
-            <div class="survey-spinner" aria-hidden="true"></div>
-            <p>در حال بارگذاری نظرسنجی...</p>
+        <div id="survey-state" class="survey-card" aria-live="polite" aria-busy="true">
+          <div class="survey-skeleton" aria-hidden="true">
+            <div class="sk sk-eyebrow"></div>
+            <div class="sk sk-title"></div>
+            <div class="sk sk-line"></div>
+            <div class="sk sk-line sk-line--short"></div>
+            <div class="sk sk-field"></div>
+            <div class="sk sk-option"></div>
+            <div class="sk sk-option"></div>
+            <div class="sk sk-option"></div>
+            <div class="sk sk-option sk-option--short"></div>
+            <div class="sk sk-button"></div>
           </div>
+          <p class="sr-only">در حال بارگذاری نظرسنجی...</p>
         </div>
       </div>
     </section>
@@ -96,6 +105,6 @@
 
   <script src="analytics.js?v=1"></script>
   <script src="main.js?v=14"></script>
-  <script src="survey.js?v=1"></script>
+  <script src="survey.js?v=2"></script>
 </body>
 </html>
