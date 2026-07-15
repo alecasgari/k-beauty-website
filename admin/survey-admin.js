@@ -199,7 +199,6 @@
         html += '<button type="button" class="btn btn--ghost" data-status="' + escapeAttr(s.id) + '" data-next="open">باز کردن</button>';
       }
       html += '<button type="button" class="btn btn--ghost" data-copy="' + escapeAttr(s.id) + '">کپی لینک</button>';
-      html += '<button type="button" class="btn btn--ghost" data-copy-tg="' + escapeAttr(s.id) + '">کپی عبارت n8n</button>';
       html += '</div></article>';
     });
     html += '</div>';
@@ -223,11 +222,6 @@
     listEl.querySelectorAll('[data-copy]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         copyText(publicUrl(btn.getAttribute('data-copy')));
-      });
-    });
-    listEl.querySelectorAll('[data-copy-tg]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        onCopyTelegram(btn.getAttribute('data-copy-tg'));
       });
     });
   }
@@ -495,9 +489,7 @@
         html += '<article class="results-raw__item">';
         html += '<header><strong>' + escapeHtml(r.name || '—') + '</strong>';
         html += '<span>' + escapeHtml(formatDate(r.submittedAt)) + '</span></header>';
-        html += '<p class="results-raw__meta">منبع: ' + escapeHtml(r.source || '—');
-        if (r.chatId) html += ' · chatId: <code dir="ltr">' + escapeHtml(r.chatId) + '</code>';
-        html += '</p>';
+        html += '<p class="results-raw__meta">منبع: ' + escapeHtml(r.source || '—') + '</p>';
         html += '<ul>' + renderAnswerLabels(r.answersText) + '</ul>';
         html += '</article>';
       });
@@ -534,18 +526,6 @@
 
   function publicUrl(id) {
     return SITE_ORIGIN + '/survey.html?id=' + encodeURIComponent(id);
-  }
-
-  function telegramTemplate(id) {
-    return (
-      "={{ 'https://k-beauty.academy/survey.html?id=" +
-      id +
-      "&name=' + encodeURIComponent($json.firstName || $json.name || '') + '&cid=' + String($json.chatId || $json.id) }}"
-    );
-  }
-
-  function onCopyTelegram(id) {
-    copyText(telegramTemplate(id));
   }
 
   function copyText(text) {
@@ -618,5 +598,5 @@
   }
 
   // Expose template helper for console debugging if needed
-  window.kbSurveyAdminTelegramTemplate = telegramTemplate;
+  window.kbSurveyAdminPublicUrl = publicUrl;
 })();

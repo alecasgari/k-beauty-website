@@ -5,7 +5,7 @@
 | پوشه / فایل | موضوع |
 |-------------|--------|
 | `kbeauty-certificate-lookup.json` | استعلام گواهینامه |
-| [`survey/`](./survey/) | سیستم نظرسنجی (عمومی + ادمین + Google Sheets) |
+| [`survey/`](./survey/) | سیستم نظرسنجی (عمومی + ادمین + n8n Data Tables) |
 
 ---
 

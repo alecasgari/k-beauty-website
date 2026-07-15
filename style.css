@@ -3282,6 +3282,14 @@ body.telegram-dock-modal-open {
 }
 
 /* --- Skeleton shimmer --- */
+.survey-patience {
+  margin: 0 0 0.85rem;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--purple-elegant);
+}
+
 .survey-skeleton {
   display: grid;
   gap: 0.65rem;

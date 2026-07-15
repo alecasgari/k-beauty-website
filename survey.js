@@ -1,6 +1,6 @@
 /**
  * K-Beauty Academy — Public Survey Page
- * Loads survey definition from n8n and submits answers to Google Sheets via webhook.
+ * Loads survey from n8n Data Tables via webhook and submits responses.
  */
 (function () {
   'use strict';
@@ -8,10 +8,8 @@
   var SURVEY_WEBHOOK_URL = 'https://n8n.alecasgari.com/webhook/kbeauty-survey';
 
   var params = new URLSearchParams(window.location.search);
-  var surveyId = sanitizeParam(params.get('id') || params.get('surveyId') || '');
-  var prefillName = sanitizeIdentityParam(params.get('name') || '');
-  var chatId = sanitizeIdentityParam(params.get('cid') || params.get('chatId') || '');
-  var sourceHint = sanitizeParam(params.get('src') || params.get('source') || '') || (chatId ? 'telegram' : 'web');
+  var surveyId = String(params.get('id') || params.get('surveyId') || '').trim();
+  var sourceHint = String(params.get('src') || params.get('source') || 'web').trim() || 'web';
 
   var stateEl = document.getElementById('survey-state');
   var modalEl = document.getElementById('survey-thanks-modal');
@@ -30,41 +28,6 @@
     loadSurvey();
   }
 
-  /**
-   * Telegram Inline Keyboard URLs are static. If the bot/n8n left literal
-   * {{name}} / {{chatId}} (or URL-encoded forms) in the link, ignore them.
-   */
-  function sanitizeIdentityParam(raw) {
-    var value = String(raw == null ? '' : raw).trim();
-    if (!value) return '';
-
-    var decoded = value;
-    try {
-      decoded = decodeURIComponent(value).trim();
-    } catch (e) {
-      decoded = value;
-    }
-
-    var normalized = decoded.replace(/\s+/g, '');
-    if (
-      normalized === '{{name}}' ||
-      normalized === '{{chatId}}' ||
-      normalized === '{{chat_id}}' ||
-      normalized === '{{cid}}' ||
-      /^\{\{[a-zA-Z0-9_.]+\}\}$/.test(normalized) ||
-      /^\$\{\{.*\}\}$/.test(normalized) ||
-      /^%7B%7B.+%7D%7D$/i.test(value.replace(/\s+/g, ''))
-    ) {
-      return '';
-    }
-
-    return decoded.replace(/\s+/g, ' ').slice(0, 120);
-  }
-
-  function sanitizeParam(raw) {
-    return String(raw == null ? '' : raw).trim();
-  }
-
   function bindModalClose() {
     if (!modalEl) return;
     modalEl.addEventListener('click', function (e) {
@@ -79,6 +42,7 @@
     if (!stateEl) return;
     stateEl.setAttribute('aria-busy', 'true');
     stateEl.innerHTML =
+      '<p class="survey-patience">لطفاً شکیبا باشید</p>' +
       '<div class="survey-skeleton" aria-hidden="true">' +
         '<div class="sk sk-eyebrow"></div>' +
         '<div class="sk sk-title"></div>' +
@@ -97,8 +61,7 @@
   function loadSurvey() {
     postWebhook({
       action: 'get',
-      surveyId: surveyId,
-      chatId: chatId
+      surveyId: surveyId
     }).then(function (data) {
       if (!data || !data.ok) {
         renderApiError(data);
@@ -116,17 +79,16 @@
     var title = 'امکان شرکت در نظرسنجی نیست';
     var message = (data && data.message) || 'خطای ناشناخته';
 
-    if (code === 'ALREADY_VOTED') {
-      title = 'رأی شما قبلاً ثبت شده';
-      message = 'شما قبلاً در این نظرسنجی رأی داده‌اید. از مشارکت‌تان سپاسگزاریم.';
-    } else if (code === 'CLOSED') {
+    if (code === 'CLOSED') {
       title = 'نظرسنجی بسته شده';
       message = 'این نظرسنجی دیگر فعال نیست.';
     } else if (code === 'NOT_FOUND' || code === 'MISSING_ID') {
       title = 'نظرسنجی یافت نشد';
+    } else if (code === 'INSERT_FAILED' || code === 'SERVER_ERROR') {
+      title = 'خطای سرور';
     }
 
-    renderMessage(code === 'ALREADY_VOTED' ? 'info' : 'error', title, message);
+    renderMessage(code === 'CLOSED' ? 'info' : 'error', title, message);
   }
 
   function renderMessage(type, title, message) {
@@ -150,7 +112,6 @@
       return;
     }
 
-    var nameLocked = !!prefillName;
     var html = '';
     html += '<span class="eyebrow">Survey</span>';
     html += '<h1>' + escapeHtml(survey.title || 'نظرسنجی') + '</h1>';
@@ -166,13 +127,7 @@
 
     html += '<div class="form-group" id="survey-name-group">';
     html += '<label for="survey_name">نام شما</label>';
-    html += '<input type="text" id="survey_name" name="name" maxlength="120" required autocomplete="name"';
-    html += ' value="' + escapeAttr(prefillName) + '"';
-    if (nameLocked) html += ' readonly';
-    html += ' placeholder="نام و نام خانوادگی">';
-    if (!nameLocked) {
-      html += '<p class="form-hint">اگر از تلگرام آمده‌اید و نام خالی است، خودتان وارد کنید.</p>';
-    }
+    html += '<input type="text" id="survey_name" name="name" maxlength="120" required autocomplete="name" placeholder="نام و نام خانوادگی">';
     html += '<p class="form-error" id="survey_name-error" hidden></p>';
     html += '</div>';
 
@@ -198,9 +153,7 @@
     stateEl.innerHTML = html;
 
     var form = document.getElementById('survey-form');
-    if (form) {
-      form.addEventListener('submit', onSubmit);
-    }
+    if (form) form.addEventListener('submit', onSubmit);
   }
 
   function onSubmit(e) {
@@ -213,12 +166,9 @@
 
     var nameInput = form.querySelector('#survey_name');
     var name = String((nameInput && nameInput.value) || '').replace(/\s+/g, ' ').trim();
-    if (!name || isPlaceholderIdentity(name)) {
+    if (!name) {
       showFieldError('survey_name-error', 'لطفاً نام خود را وارد کنید');
-      if (nameInput) {
-        nameInput.removeAttribute('readonly');
-        nameInput.focus();
-      }
+      if (nameInput) nameInput.focus();
       return;
     }
 
@@ -249,16 +199,11 @@
       action: 'submit',
       surveyId: surveyId,
       name: name,
-      chatId: chatId,
       source: sourceHint,
       answers: answers
     }).then(function (data) {
       setLoading(submitBtn, false);
       if (!data || !data.ok) {
-        if (data && data.code === 'ALREADY_VOTED') {
-          renderApiError(data);
-          return;
-        }
         alert((data && data.message) || 'ثبت نظر با خطا مواجه شد.');
         return;
       }
@@ -268,10 +213,6 @@
       setLoading(submitBtn, false);
       alert('خطا در اتصال به سرور. لطفاً دوباره تلاش کنید.');
     });
-  }
-
-  function isPlaceholderIdentity(value) {
-    return !sanitizeIdentityParam(value);
   }
 
   function openThanksModal(name) {

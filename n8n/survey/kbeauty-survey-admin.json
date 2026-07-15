@@ -15,185 +15,240 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        240,
+        220,
         400
       ],
       "webhookId": "kbeauty-survey-admin"
     },
     {
       "parameters": {
-        "operation": "read",
-        "documentId": {
-          "__rl": true,
-          "value": "1mRJFme3GuIkIAlqN0OBRMuwyfK5A706eQ-McYHTfaSQ",
-          "mode": "id"
+        "jsCode": "const body = ($json.body) || {};\nconst action = String(body.action || '').trim().toLowerCase();\nif (!action) {\n  return [{ json: { ok: false, code: 'MISSING_ACTION', message: 'پارامتر action الزامی است', valid: false } }];\n}\nconst allowed = ['login','list','get','save','setstatus','results'];\nif (!allowed.includes(action)) {\n  return [{ json: { ok: false, code: 'BAD_ACTION', message: 'عملیات نامعتبر است', valid: false } }];\n}\nreturn [{ json: { ...$json, valid: true, action } }];"
+      },
+      "id": "adm-val",
+      "name": "Validate Admin Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        400
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
         },
-        "sheetName": {
+        "options": {}
+      },
+      "id": "adm-vif",
+      "name": "Admin Request Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "adm-rbad",
+      "name": "Respond Bad Request",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        900,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
           "__rl": true,
-          "value": "Surveys",
-          "mode": "name"
+          "mode": "id",
+          "value": "31hDDjJqGtCVb8EJ",
+          "cachedResultName": "K Beauty Survey Surveys"
         },
-        "options": {},
-        "filtersUI": {
-          "values": []
+        "returnAll": true,
+        "filters": {
+          "conditions": []
+        },
+        "options": {
+          "alwaysOutputData": true
         }
       },
       "id": "adm-s",
       "name": "Read Surveys",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
       "position": [
-        500,
-        80
+        900,
+        40
       ],
-      "notes": "بعد از import، credential گوگل شیت را وصل کنید و Document/Sheet را یک‌بار Confirm کنید.",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "REPLACE_WITH_GOOGLE_SHEETS_CREDENTIAL_ID",
-          "name": "Google Sheets account"
-        }
-      },
-      "alwaysOutputData": true
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "notes": "Data Table ID: 31hDDjJqGtCVb8EJ"
     },
     {
       "parameters": {
-        "operation": "read",
-        "documentId": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
           "__rl": true,
-          "value": "1mRJFme3GuIkIAlqN0OBRMuwyfK5A706eQ-McYHTfaSQ",
-          "mode": "id"
+          "mode": "id",
+          "value": "jnY4tM908NlpE7aA",
+          "cachedResultName": "K Beauty Survey Questions"
         },
-        "sheetName": {
-          "__rl": true,
-          "value": "Questions",
-          "mode": "name"
+        "returnAll": true,
+        "filters": {
+          "conditions": []
         },
-        "options": {},
-        "filtersUI": {
-          "values": []
+        "options": {
+          "alwaysOutputData": true
         }
       },
       "id": "adm-q",
       "name": "Read Questions",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
       "position": [
-        500,
-        240
+        900,
+        180
       ],
-      "notes": "بعد از import، credential گوگل شیت را وصل کنید و Document/Sheet را یک‌بار Confirm کنید.",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "REPLACE_WITH_GOOGLE_SHEETS_CREDENTIAL_ID",
-          "name": "Google Sheets account"
-        }
-      },
-      "alwaysOutputData": true
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "notes": "Data Table ID: jnY4tM908NlpE7aA"
     },
     {
       "parameters": {
-        "operation": "read",
-        "documentId": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
           "__rl": true,
-          "value": "1mRJFme3GuIkIAlqN0OBRMuwyfK5A706eQ-McYHTfaSQ",
-          "mode": "id"
+          "mode": "id",
+          "value": "Bbc0jmj8o9LOlkDb",
+          "cachedResultName": "K Beauty Survey Options"
         },
-        "sheetName": {
-          "__rl": true,
-          "value": "Options",
-          "mode": "name"
+        "returnAll": true,
+        "filters": {
+          "conditions": []
         },
-        "options": {},
-        "filtersUI": {
-          "values": []
+        "options": {
+          "alwaysOutputData": true
         }
       },
       "id": "adm-o",
       "name": "Read Options",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
       "position": [
-        500,
-        400
+        900,
+        320
       ],
-      "notes": "بعد از import، credential گوگل شیت را وصل کنید و Document/Sheet را یک‌بار Confirm کنید.",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "REPLACE_WITH_GOOGLE_SHEETS_CREDENTIAL_ID",
-          "name": "Google Sheets account"
-        }
-      },
-      "alwaysOutputData": true
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "notes": "Data Table ID: Bbc0jmj8o9LOlkDb"
     },
     {
       "parameters": {
-        "operation": "read",
-        "documentId": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
           "__rl": true,
-          "value": "1mRJFme3GuIkIAlqN0OBRMuwyfK5A706eQ-McYHTfaSQ",
-          "mode": "id"
+          "mode": "id",
+          "value": "QewUR3JU77ee4jS7",
+          "cachedResultName": "K Beauty Survey Responses"
         },
-        "sheetName": {
-          "__rl": true,
-          "value": "Responses",
-          "mode": "name"
+        "returnAll": true,
+        "filters": {
+          "conditions": []
         },
-        "options": {},
-        "filtersUI": {
-          "values": []
+        "options": {
+          "alwaysOutputData": true
         }
       },
       "id": "adm-r",
       "name": "Read Responses",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
       "position": [
-        500,
-        560
+        900,
+        460
       ],
-      "notes": "بعد از import، credential گوگل شیت را وصل کنید و Document/Sheet را یک‌بار Confirm کنید.",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "REPLACE_WITH_GOOGLE_SHEETS_CREDENTIAL_ID",
-          "name": "Google Sheets account"
-        }
-      },
-      "alwaysOutputData": true
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "notes": "Data Table ID: QewUR3JU77ee4jS7"
     },
     {
       "parameters": {
-        "operation": "read",
-        "documentId": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
           "__rl": true,
-          "value": "1mRJFme3GuIkIAlqN0OBRMuwyfK5A706eQ-McYHTfaSQ",
-          "mode": "id"
+          "mode": "id",
+          "value": "yh9YgO2GRaOP95np",
+          "cachedResultName": "K Beauty Survey Admins"
         },
-        "sheetName": {
-          "__rl": true,
-          "value": "Admins",
-          "mode": "name"
+        "returnAll": true,
+        "filters": {
+          "conditions": []
         },
-        "options": {},
-        "filtersUI": {
-          "values": []
+        "options": {
+          "alwaysOutputData": true
         }
       },
       "id": "adm-a",
       "name": "Read Admins",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
       "position": [
-        500,
-        720
+        900,
+        600
       ],
-      "notes": "بعد از import، credential گوگل شیت را وصل کنید و Document/Sheet را یک‌بار Confirm کنید.",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "REPLACE_WITH_GOOGLE_SHEETS_CREDENTIAL_ID",
-          "name": "Google Sheets account"
-        }
-      },
-      "alwaysOutputData": true
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "notes": "Data Table ID: yh9YgO2GRaOP95np"
     },
     {
       "parameters": {
@@ -204,8 +259,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3,
       "position": [
-        760,
-        160
+        1140,
+        110
       ]
     },
     {
@@ -217,8 +272,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3,
       "position": [
-        760,
-        480
+        1140,
+        390
       ]
     },
     {
@@ -230,8 +285,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3,
       "position": [
-        980,
-        600
+        1360,
+        500
       ]
     },
     {
@@ -243,22 +298,23 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3,
       "position": [
-        1200,
-        320
+        1580,
+        300
       ]
     },
     {
       "parameters": {
-        "jsCode": "const body = ($('Webhook').first().json.body) || {};\nconst action = String(body.action || '').trim().toLowerCase();\nconst token = String(body.token || '').trim();\n\nconst surveys = $('Read Surveys').all().map(i => i.json).filter(r => r && r.id);\nconst questions = $('Read Questions').all().map(i => i.json).filter(r => r && r.id);\nconst options = $('Read Options').all().map(i => i.json).filter(r => r && r.id);\nconst responses = $('Read Responses').all().map(i => i.json).filter(r => r && (r.id || r.surveyId));\nconst admins = $('Read Admins').all().map(i => i.json).filter(r => r && (r.password || r.token));\n\nfunction flagActive(v) {\n  const s = String(v ?? 'TRUE').trim().toUpperCase();\n  return s === '' || s === 'TRUE' || s === '1' || s === 'YES' || s === 'بله';\n}\n\nfunction parseDefinition(raw) {\n  if (!raw) return null;\n  if (typeof raw === 'object') return raw;\n  try { return JSON.parse(String(raw)); } catch (e) { return null; }\n}\n\nfunction authAdmin() {\n  if (!token) return null;\n  return admins.find(a => flagActive(a.active) && String(a.token || '').trim() === token) || null;\n}\n\nfunction buildFromSheets(surveyId) {\n  return questions\n    .filter(q => String(q.surveyId).trim() === surveyId && flagActive(q.active))\n    .sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0))\n    .map(q => {\n      const qid = String(q.id).trim();\n      return {\n        id: qid,\n        text: String(q.text || '').trim(),\n        sortOrder: Number(q.sortOrder || 0),\n        options: options\n          .filter(o => String(o.questionId).trim() === qid && flagActive(o.active))\n          .sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0))\n          .map(o => ({\n            id: String(o.id).trim(),\n            text: String(o.text || '').trim(),\n            sortOrder: Number(o.sortOrder || 0)\n          }))\n      };\n    });\n}\n\nfunction buildQuestions(survey) {\n  const def = parseDefinition(survey.definitionJson);\n  if (def && Array.isArray(def.questions) && def.questions.length) {\n    return def.questions.map((q, qi) => ({\n      id: String(q.id || ('q_' + (qi + 1))).trim(),\n      text: String(q.text || '').trim(),\n      sortOrder: Number(q.sortOrder != null ? q.sortOrder : qi + 1),\n      options: (Array.isArray(q.options) ? q.options : []).map((o, oi) => ({\n        id: String(o.id || ('o_' + (qi + 1) + '_' + (oi + 1))).trim(),\n        text: String(o.text || '').trim(),\n        sortOrder: Number(o.sortOrder != null ? o.sortOrder : oi + 1)\n      }))\n    }));\n  }\n  return buildFromSheets(String(survey.id).trim());\n}\n\nfunction slugify(input) {\n  return String(input || '')\n    .trim()\n    .toLowerCase()\n    .replace(/\\s+/g, '-')\n    .replace(/[^a-z0-9\\-_+]/g, '')\n    .replace(/\\-+/g, '-')\n    .slice(0, 48) || ('survey_' + Date.now().toString(36));\n}\n\nfunction uid(prefix) {\n  return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7);\n}\n\nfunction unauthorized() {\n  return [{ json: {\n    ok: false,\n    code: 'UNAUTHORIZED',\n    message: 'دسترسی مجاز نیست. دوباره وارد شوید.',\n    writeMode: 'none'\n  } }];\n}\n\nif (action === 'login') {\n  const password = String(body.password || '').trim();\n  if (!password) {\n    return [{ json: { ok: false, code: 'MISSING_PASSWORD', message: 'رمز عبور را وارد کنید', writeMode: 'none' } }];\n  }\n  const admin = admins.find(a => flagActive(a.active) && String(a.password || '') === password);\n  if (!admin) {\n    return [{ json: { ok: false, code: 'BAD_CREDENTIALS', message: 'رمز عبور اشتباه است', writeMode: 'none' } }];\n  }\n  return [{ json: {\n    ok: true,\n    writeMode: 'none',\n    token: String(admin.token || '').trim(),\n    admin: {\n      name: String(admin.name || 'Admin').trim(),\n      email: String(admin.email || '').trim()\n    }\n  } }];\n}\n\nconst admin = authAdmin();\nif (!admin) return unauthorized();\n\nif (action === 'list') {\n  const list = surveys\n    .map(s => {\n      const id = String(s.id).trim();\n      const count = responses.filter(r => String(r.surveyId).trim() === id).length;\n      return {\n        id,\n        title: String(s.title || '').trim(),\n        description: String(s.description || '').trim(),\n        status: String(s.status || 'open').trim().toLowerCase(),\n        createdAt: String(s.createdAt || '').trim(),\n        updatedAt: String(s.updatedAt || '').trim(),\n        responseCount: count\n      };\n    })\n    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)));\n\n  return [{ json: { ok: true, writeMode: 'none', surveys: list } }];\n}\n\nif (action === 'get') {\n  const surveyId = String(body.surveyId || body.id || '').trim();\n  const survey = surveys.find(s => String(s.id).trim() === surveyId);\n  if (!survey) {\n    return [{ json: { ok: false, code: 'NOT_FOUND', message: 'نظرسنجی یافت نشد', writeMode: 'none' } }];\n  }\n  return [{ json: {\n    ok: true,\n    writeMode: 'none',\n    survey: {\n      id: String(survey.id).trim(),\n      title: String(survey.title || '').trim(),\n      description: String(survey.description || '').trim(),\n      status: String(survey.status || 'open').trim().toLowerCase(),\n      createdAt: String(survey.createdAt || '').trim(),\n      updatedAt: String(survey.updatedAt || '').trim(),\n      questions: buildQuestions(survey)\n    }\n  } }];\n}\n\nif (action === 'setstatus') {\n  const surveyId = String(body.surveyId || body.id || '').trim();\n  const status = String(body.status || '').trim().toLowerCase();\n  if (!['open', 'closed', 'draft'].includes(status)) {\n    return [{ json: { ok: false, code: 'BAD_STATUS', message: 'وضعیت نامعتبر است', writeMode: 'none' } }];\n  }\n  const survey = surveys.find(s => String(s.id).trim() === surveyId);\n  if (!survey) {\n    return [{ json: { ok: false, code: 'NOT_FOUND', message: 'نظرسنجی یافت نشد', writeMode: 'none' } }];\n  }\n  const now = new Date().toISOString();\n  return [{ json: {\n    ok: true,\n    writeMode: 'survey',\n    surveyRow: {\n      id: surveyId,\n      title: String(survey.title || '').trim(),\n      description: String(survey.description || '').trim(),\n      status,\n      definitionJson: String(survey.definitionJson || ''),\n      createdAt: String(survey.createdAt || now),\n      updatedAt: now\n    },\n    questionRows: [],\n    optionRows: [],\n    payload: { ok: true, surveyId, status, message: 'وضعیت نظرسنجی به‌روز شد' }\n  } }];\n}\n\nif (action === 'results') {\n  const surveyId = String(body.surveyId || body.id || '').trim();\n  const survey = surveys.find(s => String(s.id).trim() === surveyId);\n  if (!survey) {\n    return [{ json: { ok: false, code: 'NOT_FOUND', message: 'نظرسنجی یافت نشد', writeMode: 'none' } }];\n  }\n  const qs = buildQuestions(survey);\n  const rows = responses\n    .filter(r => String(r.surveyId).trim() === surveyId)\n    .sort((a, b) => String(b.submittedAt || '').localeCompare(String(a.submittedAt || '')));\n\n  const questionsStats = qs.map(q => {\n    const counts = {};\n    for (const o of q.options) counts[o.id] = 0;\n    let answered = 0;\n    for (const r of rows) {\n      let parsed = {};\n      try { parsed = JSON.parse(String(r.answersJson || '{}')); } catch (e) { parsed = {}; }\n      const optId = parsed[q.id];\n      if (optId && counts[optId] != null) {\n        counts[optId] += 1;\n        answered += 1;\n      }\n    }\n    return {\n      id: q.id,\n      text: q.text,\n      totalAnswers: answered,\n      options: q.options.map(o => ({\n        id: o.id,\n        text: o.text,\n        count: counts[o.id] || 0,\n        percent: answered ? Math.round(((counts[o.id] || 0) / answered) * 1000) / 10 : 0\n      }))\n    };\n  });\n\n  return [{ json: {\n    ok: true,\n    writeMode: 'none',\n    survey: {\n      id: surveyId,\n      title: String(survey.title || '').trim(),\n      status: String(survey.status || 'open').trim().toLowerCase()\n    },\n    totalResponses: rows.length,\n    questions: questionsStats,\n    responses: rows.map(r => ({\n      id: String(r.id || '').trim(),\n      name: String(r.name || '').trim(),\n      chatId: String(r.chatId || '').trim(),\n      source: String(r.source || '').trim(),\n      answersJson: String(r.answersJson || ''),\n      answersText: String(r.answersText || ''),\n      submittedAt: String(r.submittedAt || '').trim()\n    }))\n  } }];\n}\n\nif (action === 'save') {\n  const incoming = body.survey && typeof body.survey === 'object' ? body.survey : {};\n  let surveyId = String(incoming.id || body.surveyId || '').trim();\n  const isNew = !surveyId || !surveys.some(s => String(s.id).trim() === surveyId);\n  if (!surveyId) surveyId = slugify(incoming.title || incoming.slug || 'survey');\n  if (isNew && surveys.some(s => String(s.id).trim() === surveyId)) {\n    surveyId = surveyId + '_' + Date.now().toString(36);\n  }\n\n  const title = String(incoming.title || '').trim();\n  if (!title) {\n    return [{ json: { ok: false, code: 'MISSING_TITLE', message: 'عنوان نظرسنجی الزامی است', writeMode: 'none' } }];\n  }\n\n  const status = String(incoming.status || 'open').trim().toLowerCase();\n  if (!['open', 'closed', 'draft'].includes(status)) {\n    return [{ json: { ok: false, code: 'BAD_STATUS', message: 'وضعیت نامعتبر است', writeMode: 'none' } }];\n  }\n\n  const rawQuestions = Array.isArray(incoming.questions) ? incoming.questions : [];\n  if (!rawQuestions.length) {\n    return [{ json: { ok: false, code: 'MISSING_QUESTIONS', message: 'حداقل یک سوال لازم است', writeMode: 'none' } }];\n  }\n\n  const normalizedQuestions = [];\n  const questionRows = [];\n  const optionRows = [];\n\n  rawQuestions.forEach((q, qi) => {\n    const qid = String(q.id || uid('q')).trim();\n    const qtext = String(q.text || '').trim();\n    const qOrder = Number(q.sortOrder != null ? q.sortOrder : qi + 1);\n    const qOpts = Array.isArray(q.options) ? q.options : [];\n    if (!qtext || qOpts.length < 2) return;\n\n    const normOpts = [];\n    qOpts.forEach((o, oi) => {\n      const oid = String(o.id || uid('o')).trim();\n      const otext = String(o.text || '').trim();\n      if (!otext) return;\n      const oOrder = Number(o.sortOrder != null ? o.sortOrder : oi + 1);\n      normOpts.push({ id: oid, text: otext, sortOrder: oOrder });\n      optionRows.push({\n        id: oid,\n        questionId: qid,\n        surveyId,\n        text: otext,\n        sortOrder: oOrder,\n        active: 'TRUE'\n      });\n    });\n\n    if (normOpts.length < 2) return;\n    normalizedQuestions.push({ id: qid, text: qtext, sortOrder: qOrder, options: normOpts });\n    questionRows.push({\n      id: qid,\n      surveyId,\n      text: qtext,\n      sortOrder: qOrder,\n      active: 'TRUE'\n    });\n  });\n\n  if (!normalizedQuestions.length) {\n    return [{ json: { ok: false, code: 'INVALID_QUESTIONS', message: 'سوال‌ها یا گزینه‌ها ناقص هستند', writeMode: 'none' } }];\n  }\n\n  // Soft-deactivate previous Q/O for this survey (keep history in sheet).\n  for (const q of questions) {\n    if (String(q.surveyId).trim() !== surveyId) continue;\n    if (!questionRows.some(nq => nq.id === String(q.id).trim())) {\n      questionRows.push({\n        id: String(q.id).trim(),\n        surveyId,\n        text: String(q.text || '').trim(),\n        sortOrder: Number(q.sortOrder || 0),\n        active: 'FALSE'\n      });\n    }\n  }\n  for (const o of options) {\n    if (String(o.surveyId).trim() !== surveyId) continue;\n    if (!optionRows.some(no => no.id === String(o.id).trim())) {\n      optionRows.push({\n        id: String(o.id).trim(),\n        questionId: String(o.questionId || '').trim(),\n        surveyId,\n        text: String(o.text || '').trim(),\n        sortOrder: Number(o.sortOrder || 0),\n        active: 'FALSE'\n      });\n    }\n  }\n\n  const existing = surveys.find(s => String(s.id).trim() === surveyId);\n  const now = new Date().toISOString();\n  const definitionJson = JSON.stringify({ questions: normalizedQuestions });\n\n  return [{ json: {\n    ok: true,\n    writeMode: 'full',\n    surveyRow: {\n      id: surveyId,\n      title,\n      description: String(incoming.description || '').trim(),\n      status,\n      definitionJson,\n      createdAt: existing ? String(existing.createdAt || now) : now,\n      updatedAt: now\n    },\n    questionRows,\n    optionRows,\n    payload: {\n      ok: true,\n      message: isNew ? 'نظرسنجی ساخته شد' : 'نظرسنجی ذخیره شد',\n      surveyId,\n      publicUrl: 'https://k-beauty.academy/survey.html?id=' + encodeURIComponent(surveyId)\n    }\n  } }];\n}\n\nreturn [{ json: { ok: false, code: 'BAD_ACTION', message: 'عملیات نامعتبر است', writeMode: 'none' } }];"
+        "jsCode": "try {\n  const body = ($('Webhook').first().json.body) || {};\n  const action = String(body.action || '').trim().toLowerCase();\n  const token = String(body.token || '').trim();\n\n  const surveys = $('Read Surveys').all().map(i => i.json).filter(r => r && r.id);\n  const questions = $('Read Questions').all().map(i => i.json).filter(r => r && r.id);\n  const options = $('Read Options').all().map(i => i.json).filter(r => r && r.id);\n  const responses = $('Read Responses').all().map(i => i.json).filter(r => r && (r.id || r.surveyId));\n  const admins = $('Read Admins').all().map(i => i.json).filter(r => r && (r.password || r.token));\n\n  function flagActive(v) {\n    const s = String(v ?? 'TRUE').trim().toUpperCase();\n    return s === '' || s === 'TRUE' || s === '1' || s === 'YES' || s === 'بله';\n  }\n\n  function parseDefinition(raw) {\n    if (!raw) return null;\n    if (typeof raw === 'object') return raw;\n    try { return JSON.parse(String(raw)); } catch (e) { return null; }\n  }\n\n  function authAdmin() {\n    if (!token) return null;\n    return admins.find(a => flagActive(a.active) && String(a.token || '').trim() === token) || null;\n  }\n\n  function buildFromTables(surveyId) {\n    return questions\n      .filter(q => String(q.surveyId).trim() === surveyId && flagActive(q.active))\n      .sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0))\n      .map(q => {\n        const qid = String(q.id).trim();\n        return {\n          id: qid,\n          text: String(q.text || '').trim(),\n          sortOrder: Number(q.sortOrder || 0),\n          options: options\n            .filter(o => String(o.questionId).trim() === qid && flagActive(o.active))\n            .sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0))\n            .map(o => ({\n              id: String(o.id).trim(),\n              text: String(o.text || '').trim(),\n              sortOrder: Number(o.sortOrder || 0)\n            }))\n        };\n      });\n  }\n\n  function buildQuestions(survey) {\n    const def = parseDefinition(survey.definitionJson);\n    if (def && Array.isArray(def.questions) && def.questions.length) {\n      return def.questions.map((q, qi) => ({\n        id: String(q.id || ('q_' + (qi + 1))).trim(),\n        text: String(q.text || '').trim(),\n        sortOrder: Number(q.sortOrder != null ? q.sortOrder : qi + 1),\n        options: (Array.isArray(q.options) ? q.options : []).map((o, oi) => ({\n          id: String(o.id || ('o_' + (qi + 1) + '_' + (oi + 1))).trim(),\n          text: String(o.text || '').trim(),\n          sortOrder: Number(o.sortOrder != null ? o.sortOrder : oi + 1)\n        }))\n      }));\n    }\n    return buildFromTables(String(survey.id).trim());\n  }\n\n  function slugify(input) {\n    return String(input || '')\n      .trim()\n      .toLowerCase()\n      .replace(/\\s+/g, '-')\n      .replace(/[^a-z0-9\\-_+]/g, '')\n      .replace(/\\-+/g, '-')\n      .slice(0, 48) || ('survey_' + Date.now().toString(36));\n  }\n\n  function uid(prefix) {\n    return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7);\n  }\n\n  function unauthorized() {\n    return [{ json: {\n      ok: false,\n      code: 'UNAUTHORIZED',\n      message: 'دسترسی مجاز نیست. دوباره وارد شوید.',\n      writeMode: 'none'\n    } }];\n  }\n\n  if (action === 'login') {\n    const password = String(body.password || '').trim();\n    if (!password) {\n      return [{ json: { ok: false, code: 'MISSING_PASSWORD', message: 'رمز عبور را وارد کنید', writeMode: 'none' } }];\n    }\n    const admin = admins.find(a => flagActive(a.active) && String(a.password || '') === password);\n    if (!admin) {\n      return [{ json: { ok: false, code: 'BAD_CREDENTIALS', message: 'رمز عبور اشتباه است', writeMode: 'none' } }];\n    }\n    return [{ json: {\n      ok: true,\n      writeMode: 'none',\n      token: String(admin.token || '').trim(),\n      admin: {\n        name: String(admin.name || 'Admin').trim(),\n        email: String(admin.email || '').trim()\n      }\n    } }];\n  }\n\n  const admin = authAdmin();\n  if (!admin) return unauthorized();\n\n  if (action === 'list') {\n    const list = surveys\n      .map(s => {\n        const id = String(s.id).trim();\n        const count = responses.filter(r => String(r.surveyId).trim() === id).length;\n        return {\n          id,\n          title: String(s.title || '').trim(),\n          description: String(s.description || '').trim(),\n          status: String(s.status || 'open').trim().toLowerCase(),\n          createdAt: String(s.createdAt || '').trim(),\n          updatedAt: String(s.updatedAt || '').trim(),\n          responseCount: count\n        };\n      })\n      .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)));\n\n    return [{ json: { ok: true, writeMode: 'none', surveys: list } }];\n  }\n\n  if (action === 'get') {\n    const surveyId = String(body.surveyId || body.id || '').trim();\n    const survey = surveys.find(s => String(s.id).trim() === surveyId);\n    if (!survey) {\n      return [{ json: { ok: false, code: 'NOT_FOUND', message: 'نظرسنجی یافت نشد', writeMode: 'none' } }];\n    }\n    return [{ json: {\n      ok: true,\n      writeMode: 'none',\n      survey: {\n        id: String(survey.id).trim(),\n        title: String(survey.title || '').trim(),\n        description: String(survey.description || '').trim(),\n        status: String(survey.status || 'open').trim().toLowerCase(),\n        createdAt: String(survey.createdAt || '').trim(),\n        updatedAt: String(survey.updatedAt || '').trim(),\n        questions: buildQuestions(survey)\n      }\n    } }];\n  }\n\n  if (action === 'setstatus') {\n    const surveyId = String(body.surveyId || body.id || '').trim();\n    const status = String(body.status || '').trim().toLowerCase();\n    if (!['open', 'closed', 'draft'].includes(status)) {\n      return [{ json: { ok: false, code: 'BAD_STATUS', message: 'وضعیت نامعتبر است', writeMode: 'none' } }];\n    }\n    const survey = surveys.find(s => String(s.id).trim() === surveyId);\n    if (!survey) {\n      return [{ json: { ok: false, code: 'NOT_FOUND', message: 'نظرسنجی یافت نشد', writeMode: 'none' } }];\n    }\n    const now = new Date().toISOString();\n    return [{ json: {\n      ok: true,\n      writeMode: 'survey',\n      surveyRow: {\n        id: surveyId,\n        title: String(survey.title || '').trim(),\n        description: String(survey.description || '').trim(),\n        status,\n        definitionJson: String(survey.definitionJson || ''),\n        createdAt: String(survey.createdAt || now),\n        updatedAt: now\n      },\n      questionRows: [],\n      optionRows: [],\n      payload: { ok: true, surveyId, status, message: 'وضعیت نظرسنجی به‌روز شد' }\n    } }];\n  }\n\n  if (action === 'results') {\n    const surveyId = String(body.surveyId || body.id || '').trim();\n    const survey = surveys.find(s => String(s.id).trim() === surveyId);\n    if (!survey) {\n      return [{ json: { ok: false, code: 'NOT_FOUND', message: 'نظرسنجی یافت نشد', writeMode: 'none' } }];\n    }\n    const qs = buildQuestions(survey);\n    const rows = responses\n      .filter(r => String(r.surveyId).trim() === surveyId)\n      .sort((a, b) => String(b.submittedAt || '').localeCompare(String(a.submittedAt || '')));\n\n    const questionsStats = qs.map(q => {\n      const counts = {};\n      for (const o of q.options) counts[o.id] = 0;\n      let answered = 0;\n      for (const r of rows) {\n        let parsed = {};\n        try { parsed = JSON.parse(String(r.answersJson || '{}')); } catch (e) { parsed = {}; }\n        const optId = parsed[q.id];\n        if (optId && counts[optId] != null) {\n          counts[optId] += 1;\n          answered += 1;\n        }\n      }\n      return {\n        id: q.id,\n        text: q.text,\n        totalAnswers: answered,\n        options: q.options.map(o => ({\n          id: o.id,\n          text: o.text,\n          count: counts[o.id] || 0,\n          percent: answered ? Math.round(((counts[o.id] || 0) / answered) * 1000) / 10 : 0\n        }))\n      };\n    });\n\n    return [{ json: {\n      ok: true,\n      writeMode: 'none',\n      survey: {\n        id: surveyId,\n        title: String(survey.title || '').trim(),\n        status: String(survey.status || 'open').trim().toLowerCase()\n      },\n      totalResponses: rows.length,\n      questions: questionsStats,\n      responses: rows.map(r => ({\n        id: String(r.id || '').trim(),\n        name: String(r.name || '').trim(),\n        source: String(r.source || '').trim(),\n        answersJson: String(r.answersJson || ''),\n        answersText: String(r.answersText || ''),\n        submittedAt: String(r.submittedAt || '').trim()\n      }))\n    } }];\n  }\n\n  if (action === 'save') {\n    const incoming = body.survey && typeof body.survey === 'object' ? body.survey : {};\n    let surveyId = String(incoming.id || body.surveyId || '').trim();\n    const isNew = !surveyId || !surveys.some(s => String(s.id).trim() === surveyId);\n    if (!surveyId) surveyId = slugify(incoming.title || incoming.slug || 'survey');\n    if (isNew && surveys.some(s => String(s.id).trim() === surveyId)) {\n      surveyId = surveyId + '_' + Date.now().toString(36);\n    }\n\n    const title = String(incoming.title || '').trim();\n    if (!title) {\n      return [{ json: { ok: false, code: 'MISSING_TITLE', message: 'عنوان نظرسنجی الزامی است', writeMode: 'none' } }];\n    }\n\n    const status = String(incoming.status || 'open').trim().toLowerCase();\n    if (!['open', 'closed', 'draft'].includes(status)) {\n      return [{ json: { ok: false, code: 'BAD_STATUS', message: 'وضعیت نامعتبر است', writeMode: 'none' } }];\n    }\n\n    const rawQuestions = Array.isArray(incoming.questions) ? incoming.questions : [];\n    if (!rawQuestions.length) {\n      return [{ json: { ok: false, code: 'MISSING_QUESTIONS', message: 'حداقل یک سوال لازم است', writeMode: 'none' } }];\n    }\n\n    const normalizedQuestions = [];\n    const questionRows = [];\n    const optionRows = [];\n\n    rawQuestions.forEach((q, qi) => {\n      const qid = String(q.id || uid('q')).trim();\n      const qtext = String(q.text || '').trim();\n      const qOrder = Number(q.sortOrder != null ? q.sortOrder : qi + 1);\n      const qOpts = Array.isArray(q.options) ? q.options : [];\n      if (!qtext || qOpts.length < 2) return;\n\n      const normOpts = [];\n      qOpts.forEach((o, oi) => {\n        const oid = String(o.id || uid('o')).trim();\n        const otext = String(o.text || '').trim();\n        if (!otext) return;\n        const oOrder = Number(o.sortOrder != null ? o.sortOrder : oi + 1);\n        normOpts.push({ id: oid, text: otext, sortOrder: oOrder });\n        optionRows.push({\n          id: oid,\n          questionId: qid,\n          surveyId,\n          text: otext,\n          sortOrder: oOrder,\n          active: 'TRUE'\n        });\n      });\n\n      if (normOpts.length < 2) return;\n      normalizedQuestions.push({ id: qid, text: qtext, sortOrder: qOrder, options: normOpts });\n      questionRows.push({\n        id: qid,\n        surveyId,\n        text: qtext,\n        sortOrder: qOrder,\n        active: 'TRUE'\n      });\n    });\n\n    if (!normalizedQuestions.length) {\n      return [{ json: { ok: false, code: 'INVALID_QUESTIONS', message: 'سوال‌ها یا گزینه‌ها ناقص هستند', writeMode: 'none' } }];\n    }\n\n    for (const q of questions) {\n      if (String(q.surveyId).trim() !== surveyId) continue;\n      if (!questionRows.some(nq => nq.id === String(q.id).trim())) {\n        questionRows.push({\n          id: String(q.id).trim(),\n          surveyId,\n          text: String(q.text || '').trim(),\n          sortOrder: Number(q.sortOrder || 0),\n          active: 'FALSE'\n        });\n      }\n    }\n    for (const o of options) {\n      if (String(o.surveyId).trim() !== surveyId) continue;\n      if (!optionRows.some(no => no.id === String(o.id).trim())) {\n        optionRows.push({\n          id: String(o.id).trim(),\n          questionId: String(o.questionId || '').trim(),\n          surveyId,\n          text: String(o.text || '').trim(),\n          sortOrder: Number(o.sortOrder || 0),\n          active: 'FALSE'\n        });\n      }\n    }\n\n    const existing = surveys.find(s => String(s.id).trim() === surveyId);\n    const now = new Date().toISOString();\n    const definitionJson = JSON.stringify({ questions: normalizedQuestions });\n\n    return [{ json: {\n      ok: true,\n      writeMode: 'full',\n      surveyRow: {\n        id: surveyId,\n        title,\n        description: String(incoming.description || '').trim(),\n        status,\n        definitionJson,\n        createdAt: existing ? String(existing.createdAt || now) : now,\n        updatedAt: now\n      },\n      questionRows,\n      optionRows,\n      payload: {\n        ok: true,\n        message: isNew ? 'نظرسنجی ساخته شد' : 'نظرسنجی ذخیره شد',\n        surveyId,\n        publicUrl: 'https://k-beauty.academy/survey.html?id=' + encodeURIComponent(surveyId)\n      }\n    } }];\n  }\n\n  return [{ json: { ok: false, code: 'BAD_ACTION', message: 'عملیات نامعتبر است', writeMode: 'none' } }];\n} catch (err) {\n  return [{ json: {\n    ok: false,\n    code: 'SERVER_ERROR',\n    message: 'خطای داخلی سرور در پنل ادمین',\n    detail: String(err && err.message ? err.message : err),\n    writeMode: 'none'\n  } }];\n}"
       },
       "id": "adm-code",
       "name": "Process Admin",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1440,
-        320
+        1800,
+        300
       ],
+      "onError": "continueRegularOutput",
       "executeOnce": true
     },
     {
@@ -272,7 +328,7 @@
           },
           "conditions": [
             {
-              "id": "w1",
+              "id": "c1",
               "leftValue": "={{ $json.writeMode }}",
               "rightValue": "none",
               "operator": {
@@ -290,78 +346,74 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1680,
-        320
+        2020,
+        300
       ]
     },
     {
       "parameters": {
-        "jsCode": "const src = $('Process Admin').first().json;\nreturn [{ json: src.surveyRow }];"
+        "jsCode": "const src = $('Process Admin').first().json;\nif (!src.surveyRow || !src.surveyRow.id) {\n  return [{ json: { ok: false, code: 'WRITE_PREP_FAILED', message: 'آماده‌سازی نظرسنجی ناموفق بود', _fail: true } }];\n}\nreturn [{ json: src.surveyRow }];"
       },
       "id": "adm-ps",
       "name": "Prepare Survey Row",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1920,
-        200
-      ]
+        2240,
+        160
+      ],
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
-        "operation": "appendOrUpdate",
-        "documentId": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
           "__rl": true,
-          "value": "1mRJFme3GuIkIAlqN0OBRMuwyfK5A706eQ-McYHTfaSQ",
-          "mode": "id"
+          "mode": "id",
+          "value": "31hDDjJqGtCVb8EJ",
+          "cachedResultName": "K Beauty Survey Surveys"
         },
-        "sheetName": {
-          "__rl": true,
-          "value": "Surveys",
-          "mode": "name"
-        },
-        "options": {
-          "cellFormat": "USER_ENTERED"
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "equals",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
         },
         "columns": {
           "mappingMode": "autoMapInputData",
-          "value": {},
-          "matchingColumns": [
-            "id"
-          ],
-          "schema": [],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        }
+          "value": {}
+        },
+        "options": {}
       },
       "id": "adm-us",
       "name": "Upsert Survey",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
       "position": [
-        2140,
-        200
+        2460,
+        160
       ],
-      "notes": "بعد از import، credential گوگل شیت را وصل کنید و Document/Sheet را یک‌بار Confirm کنید.",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "REPLACE_WITH_GOOGLE_SHEETS_CREDENTIAL_ID",
-          "name": "Google Sheets account"
-        }
-      }
+      "onError": "continueErrorOutput",
+      "notes": "Data Table ID: 31hDDjJqGtCVb8EJ"
     },
     {
       "parameters": {
-        "jsCode": "const src = $('Process Admin').first().json;\nif (String(src.writeMode || '') !== 'full') {\n  // Pass a marker so flow continues without writing Q/O\n  return [{ json: { _continue: true, _skipQo: true } }];\n}\nreturn (src.questionRows || []).map(r => ({ json: { ...r, _skipQo: false } }));"
+        "jsCode": "const src = $('Process Admin').first().json;\nif (String(src.writeMode || '') !== 'full') {\n  return [{ json: { _skipQo: true } }];\n}\nreturn (src.questionRows || []).map(r => ({ json: { ...r, _skipQo: false } }));"
       },
       "id": "adm-gate",
       "name": "Gate Questions",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2360,
-        200
-      ]
+        2680,
+        160
+      ],
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -374,9 +426,9 @@
           },
           "conditions": [
             {
-              "id": "sk1",
+              "id": "c1",
               "leftValue": "={{ $json._skipQo }}",
-              "rightValue": true,
+              "rightValue": "",
               "operator": {
                 "type": "boolean",
                 "operation": "true",
@@ -393,122 +445,126 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2580,
-        200
+        2900,
+        160
       ]
     },
     {
       "parameters": {
-        "operation": "appendOrUpdate",
-        "documentId": {
+        "jsCode": "return $input.all().map(i => { const { _skipQo, ...row } = i.json; return { json: row }; });"
+      },
+      "id": "adm-stripq",
+      "name": "Strip Question Meta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3120,
+        40
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
           "__rl": true,
-          "value": "1mRJFme3GuIkIAlqN0OBRMuwyfK5A706eQ-McYHTfaSQ",
-          "mode": "id"
+          "mode": "id",
+          "value": "jnY4tM908NlpE7aA",
+          "cachedResultName": "K Beauty Survey Questions"
         },
-        "sheetName": {
-          "__rl": true,
-          "value": "Questions",
-          "mode": "name"
-        },
-        "options": {
-          "cellFormat": "USER_ENTERED"
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "equals",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
         },
         "columns": {
           "mappingMode": "autoMapInputData",
-          "value": {},
-          "matchingColumns": [
-            "id"
-          ],
-          "schema": [],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        }
+          "value": {}
+        },
+        "options": {}
       },
       "id": "adm-uq",
       "name": "Upsert Questions",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
       "position": [
-        2920,
+        3340,
         40
       ],
-      "notes": "بعد از import، credential گوگل شیت را وصل کنید و Document/Sheet را یک‌بار Confirm کنید.",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "REPLACE_WITH_GOOGLE_SHEETS_CREDENTIAL_ID",
-          "name": "Google Sheets account"
-        }
-      }
+      "onError": "continueErrorOutput",
+      "notes": "Data Table ID: jnY4tM908NlpE7aA"
     },
     {
       "parameters": {
         "jsCode": "const src = $('Process Admin').first().json;\nreturn (src.optionRows || []).map(r => ({ json: r }));"
       },
-      "id": "adm-po2",
+      "id": "adm-po",
       "name": "Prepare Options After Q",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3140,
+        3560,
         40
       ],
+      "onError": "continueRegularOutput",
       "executeOnce": true
     },
     {
       "parameters": {
-        "operation": "appendOrUpdate",
-        "documentId": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
           "__rl": true,
-          "value": "1mRJFme3GuIkIAlqN0OBRMuwyfK5A706eQ-McYHTfaSQ",
-          "mode": "id"
+          "mode": "id",
+          "value": "Bbc0jmj8o9LOlkDb",
+          "cachedResultName": "K Beauty Survey Options"
         },
-        "sheetName": {
-          "__rl": true,
-          "value": "Options",
-          "mode": "name"
-        },
-        "options": {
-          "cellFormat": "USER_ENTERED"
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "equals",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
         },
         "columns": {
           "mappingMode": "autoMapInputData",
-          "value": {},
-          "matchingColumns": [
-            "id"
-          ],
-          "schema": [],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        }
+          "value": {}
+        },
+        "options": {}
       },
       "id": "adm-uo",
       "name": "Upsert Options",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
       "position": [
-        3360,
+        3780,
         40
       ],
-      "notes": "بعد از import، credential گوگل شیت را وصل کنید و Document/Sheet را یک‌بار Confirm کنید.",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "REPLACE_WITH_GOOGLE_SHEETS_CREDENTIAL_ID",
-          "name": "Google Sheets account"
-        }
-      }
+      "onError": "continueErrorOutput",
+      "notes": "Data Table ID: Bbc0jmj8o9LOlkDb"
     },
     {
       "parameters": {
-        "jsCode": "const src = $('Process Admin').first().json;\nif (src.payload) return [{ json: src.payload }];\nconst { writeMode, surveyRow, questionRows, optionRows, ...rest } = src;\nreturn [{ json: rest }];"
+        "jsCode": "const src = $('Process Admin').first().json;\nif (!src) {\n  return [{ json: { ok: false, code: 'EMPTY', message: 'پاسخ خالی از پردازشگر' } }];\n}\nif (src.payload) return [{ json: src.payload }];\nconst { writeMode, surveyRow, questionRows, optionRows, ...rest } = src;\nreturn [{ json: rest }];"
       },
       "id": "adm-pl",
       "name": "Build Admin Payload",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3580,
-        200
+        4000,
+        160
       ],
+      "onError": "continueRegularOutput",
       "executeOnce": true
     },
     {
@@ -539,22 +595,55 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        3800,
-        200
+        4220,
+        160
       ]
     },
     {
       "parameters": {
-        "jsCode": "const src = $('Process Admin').first().json;\nif (src.payload) return [{ json: src.payload }];\nconst { writeMode, surveyRow, questionRows, optionRows, ...rest } = src;\nreturn [{ json: rest }];"
+        "respondWith": "json",
+        "responseBody": "{\"ok\": false, \"code\": \"WRITE_FAILED\", \"message\": \"ذخیره در Data Table با خطا مواجه شد. دوباره تلاش کنید.\"}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "adm-rwrite-err",
+      "name": "Respond Write Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2900,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const src = $('Process Admin').first().json;\nif (!src) {\n  return [{ json: { ok: false, code: 'EMPTY', message: 'پاسخ خالی از پردازشگر' } }];\n}\nif (src.payload) return [{ json: src.payload }];\nconst { writeMode, surveyRow, questionRows, optionRows, ...rest } = src;\nreturn [{ json: rest }];"
       },
       "id": "adm-pl2",
       "name": "Build Direct Payload",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1920,
+        2240,
         480
-      ]
+      ],
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -584,26 +673,35 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        2140,
+        2460,
         480
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "return $input.all().map(i => { const { _skipQo, _continue, ...row } = i.json; return { json: row }; });"
-      },
-      "id": "adm-stripq",
-      "name": "Strip Question Meta",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2700,
-        40
       ]
     }
   ],
   "connections": {
     "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Admin Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Admin Request": {
+      "main": [
+        [
+          {
+            "node": "Admin Request Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Admin Request Valid?": {
       "main": [
         [
           {
@@ -628,6 +726,13 @@
           },
           {
             "node": "Read Admins",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Bad Request",
             "type": "main",
             "index": 0
           }
@@ -781,6 +886,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Respond Write Error",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -813,11 +925,29 @@
         ]
       ]
     },
+    "Strip Question Meta": {
+      "main": [
+        [
+          {
+            "node": "Upsert Questions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Upsert Questions": {
       "main": [
         [
           {
             "node": "Prepare Options After Q",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Write Error",
             "type": "main",
             "index": 0
           }
@@ -840,6 +970,13 @@
         [
           {
             "node": "Build Admin Payload",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Write Error",
             "type": "main",
             "index": 0
           }
@@ -867,17 +1004,6 @@
           }
         ]
       ]
-    },
-    "Strip Question Meta": {
-      "main": [
-        [
-          {
-            "node": "Upsert Questions",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "active": false,
@@ -885,7 +1011,7 @@
     "executionOrder": "v1"
   },
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": true
   },
   "tags": []
 }
