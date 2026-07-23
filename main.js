@@ -765,6 +765,151 @@
     });
   }
 
+  var PURCHASE_REQUEST_MAX_BYTES = 8 * 1024 * 1024;
+  var PURCHASE_REQUEST_TYPES = {
+    'image/jpeg': true,
+    'image/png': true,
+    'image/webp': true,
+    'application/pdf': true
+  };
+
+  function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function initPurchaseRequestUpload(form) {
+    var zone = document.getElementById('purchase-request-zone');
+    var fileInput = document.getElementById('purchase_request_file');
+    var cameraInput = document.getElementById('purchase_request_camera');
+    var idle = document.getElementById('purchase-request-idle');
+    var preview = document.getElementById('purchase-request-preview');
+    var thumb = document.getElementById('purchase-request-thumb');
+    var fileNameEl = document.getElementById('purchase-request-filename');
+    var fileSizeEl = document.getElementById('purchase-request-filesize');
+    var selectedFile = null;
+    var objectUrl = null;
+
+    if (!zone || !fileInput || !cameraInput) {
+      return {
+        getFile: function () { return null; },
+        clear: function () {}
+      };
+    }
+
+    function clearPreview() {
+      selectedFile = null;
+      fileInput.value = '';
+      cameraInput.value = '';
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+        objectUrl = null;
+      }
+      if (thumb) {
+        thumb.hidden = true;
+        thumb.removeAttribute('src');
+      }
+      if (idle) idle.hidden = false;
+      if (preview) preview.hidden = true;
+      zone.classList.remove('is-invalid');
+      clearFieldError('purchase-request-group', 'purchase_request-error');
+    }
+
+    function setFile(file) {
+      if (!file) return;
+
+      if (!PURCHASE_REQUEST_TYPES[file.type]) {
+        showFieldError('purchase-request-group', 'purchase_request-error', 'فقط فایل‌های JPG، PNG، WEBP یا PDF مجاز است.');
+        zone.classList.add('is-invalid');
+        return;
+      }
+
+      if (file.size > PURCHASE_REQUEST_MAX_BYTES) {
+        showFieldError('purchase-request-group', 'purchase_request-error', 'حجم فایل نباید بیشتر از ۸ مگابایت باشد.');
+        zone.classList.add('is-invalid');
+        return;
+      }
+
+      selectedFile = file;
+      clearFieldError('purchase-request-group', 'purchase_request-error');
+      zone.classList.remove('is-invalid');
+
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+        objectUrl = null;
+      }
+
+      if (fileNameEl) fileNameEl.textContent = file.name;
+      if (fileSizeEl) fileSizeEl.textContent = formatFileSize(file.size);
+
+      if (thumb) {
+        if (file.type.indexOf('image/') === 0) {
+          objectUrl = URL.createObjectURL(file);
+          thumb.src = objectUrl;
+          thumb.hidden = false;
+        } else {
+          thumb.hidden = true;
+          thumb.removeAttribute('src');
+        }
+      }
+
+      if (idle) idle.hidden = true;
+      if (preview) preview.hidden = false;
+    }
+
+    zone.addEventListener('click', function (e) {
+      var actionBtn = e.target.closest('[data-upload-action]');
+      if (!actionBtn) return;
+
+      var action = actionBtn.getAttribute('data-upload-action');
+      if (action === 'browse') fileInput.click();
+      if (action === 'camera') cameraInput.click();
+      if (action === 'remove') clearPreview();
+    });
+
+    zone.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        fileInput.click();
+      }
+    });
+
+    ['dragenter', 'dragover'].forEach(function (eventName) {
+      zone.addEventListener(eventName, function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.classList.add('is-dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(function (eventName) {
+      zone.addEventListener(eventName, function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.classList.remove('is-dragover');
+      });
+    });
+
+    zone.addEventListener('drop', function (e) {
+      var files = e.dataTransfer && e.dataTransfer.files;
+      if (files && files[0]) setFile(files[0]);
+    });
+
+    fileInput.addEventListener('change', function () {
+      if (fileInput.files && fileInput.files[0]) setFile(fileInput.files[0]);
+    });
+
+    cameraInput.addEventListener('change', function () {
+      if (cameraInput.files && cameraInput.files[0]) setFile(cameraInput.files[0]);
+    });
+
+    return {
+      getFile: function () { return selectedFile; },
+      clear: clearPreview
+    };
+  }
+
   function initContactForm() {
     const form = document.getElementById('contact-form');
     if (!form) return;
@@ -777,6 +922,7 @@
     const messageCount = document.getElementById('message-count');
     const emailInput = form.querySelector('[name="email"]');
     const emailConfirmInput = form.querySelector('[name="email_confirm"]');
+    const purchaseUpload = initPurchaseRequestUpload(form);
     let formStarted = false;
 
     function trackContactStartOnce() {
@@ -856,6 +1002,8 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       clearContactFormErrors(form);
+      var zone = document.getElementById('purchase-request-zone');
+      if (zone) zone.classList.remove('is-invalid');
 
       const honeypot = form.querySelector('[name="website"]').value.trim();
       if (honeypot) {
@@ -872,6 +1020,7 @@
       const phone = normalizeDigits(form.querySelector('[name="phone"]').value.trim());
       const message = (messageInput.value || '').trim().slice(0, 300);
       const products = getSelectedProducts(form);
+      const purchaseFile = purchaseUpload.getFile();
       let hasError = false;
 
       if (!fullName) {
@@ -929,6 +1078,12 @@
         hasError = true;
       }
 
+      if (!purchaseFile) {
+        showFieldError('purchase-request-group', 'purchase_request-error', 'بارگذاری تصویر درخواست خرید الزامی است.');
+        if (zone) zone.classList.add('is-invalid');
+        hasError = true;
+      }
+
       if (hasError) {
         if (window.kbAnalytics) {
           window.kbAnalytics.trackFormError('contact', 'validation', 'form_validation_failed');
@@ -939,22 +1094,41 @@
       trackContactStartOnce();
 
       const specialtyDetail = specialty === 'سایر' ? specialtyOther : specialty;
-      const payload = {
+      const utm = getUtmParams();
+      const summaryData = {
         full_name: fullName,
-        name: fullName,
         center_name: centerName,
         city: city,
         email: email,
-        email_confirm: emailConfirm,
         specialty: specialty,
         specialty_detail: specialtyDetail,
         phone: phone,
         products: products,
         message: message,
-        website: honeypot,
-        submitted_at: new Date().toISOString(),
-        ...getUtmParams()
+        purchase_request_file_name: purchaseFile.name
       };
+
+      const formData = new FormData();
+      formData.append('full_name', fullName);
+      formData.append('name', fullName);
+      formData.append('center_name', centerName);
+      formData.append('city', city);
+      formData.append('email', email);
+      formData.append('email_confirm', emailConfirm);
+      formData.append('specialty', specialty);
+      formData.append('specialty_detail', specialtyDetail);
+      formData.append('phone', phone);
+      formData.append('products', products.join(', '));
+      formData.append('message', message);
+      formData.append('website', honeypot);
+      formData.append('submitted_at', new Date().toISOString());
+      formData.append('purchase_request', purchaseFile, purchaseFile.name);
+
+      Object.keys(utm).forEach(function (key) {
+        if (utm[key] != null && utm[key] !== '') {
+          formData.append(key, utm[key]);
+        }
+      });
 
       if (submitBtn) {
         submitBtn.disabled = true;
@@ -963,20 +1137,21 @@
 
       fetch(CONTACT_WEBHOOK_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: formData
       })
         .then(function (response) {
           if (!response.ok) {
             throw new Error('Request failed');
           }
-          showContactSuccess(payload);
+          showContactSuccess(summaryData);
+          purchaseUpload.clear();
           if (window.kbAnalytics) {
             window.kbAnalytics.trackFormSubmit('contact', {
               specialty: specialty,
               products: products.join(', ')
             });
             window.kbAnalytics.trackConversion('contact_form');
+            window.kbAnalytics.trackFileDownload(purchaseFile.name, 'purchase_request');
           }
         })
         .catch(function () {
@@ -1018,7 +1193,8 @@
         { label: 'ایمیل', value: data.email },
         { label: 'تخصص', value: data.specialty_detail || data.specialty },
         { label: 'شماره تماس', value: data.phone },
-        { label: 'محصولات', value: (data.products || []).join('، ') }
+        { label: 'محصولات', value: Array.isArray(data.products) ? data.products.join('، ') : (data.products || '') },
+        { label: 'فایل درخواست خرید', value: data.purchase_request_file_name || 'بارگذاری شده' }
       ];
 
       if (data.message) {

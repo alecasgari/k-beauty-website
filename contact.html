@@ -12,7 +12,7 @@
   <!-- End Google Tag Manager -->
   <meta name="description" content="تماس با K-Beauty Academy — ارتباط با تیم آکادمی پزشکی زیبایی">
   <title>تماس با ما | K-Beauty Academy</title>
-  <link rel="stylesheet" href="style.css?v=13">
+  <link rel="stylesheet" href="style.css?v=16">
   <link rel="icon" href="images/logo/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="images/logo/apple-touch-icon.png">
 </head>
@@ -83,16 +83,16 @@
   <main>
     <section class="page-hero page-hero--contact">
       <div class="container">
-        <span class="eyebrow">Partnership &amp; Contact</span>
+        <span class="eyebrow">Product Order</span>
         <h1>تماس با ما</h1>
         <p class="lead">تیم K-Beauty Academy آماده پاسخگویی به سوالات شماست</p>
-        <p class="page-hero__note">کی‌بیوتی آکادمی برای محصولات خود نمایندگی می‌پذیرد.</p>
+        <p class="page-hero__note">برای ثبت سفارش خرید محصولات، فرم زیر را تکمیل کنید.</p>
       </div>
     </section>
 
     <div class="container contact-grid">
       <div class="contact-form-card">
-        <h2>فرم درخواست نمایندگی / تماس</h2>
+        <h2>فرم درخواست خرید محصولات</h2>
         <div id="contact-form-wrapper">
           <form id="contact-form" novalidate>
             <div class="form-honeypot" aria-hidden="true">
@@ -183,6 +183,35 @@
               <p class="form-error" id="message-error" hidden></p>
             </div>
 
+            <div class="form-group" id="purchase-request-group">
+              <label for="purchase_request_file">درخواست خرید <span class="form-required">*</span></label>
+              <p class="form-hint form-hint--block">
+                تصویر درخواست خرید را بارگذاری کنید: روی سربرگ کلینیک با مهر و امضا، یا روی سرنسخه پزشک مربوط به همان کلینیک با مهر، امضا و تاریخ.
+              </p>
+              <div class="upload-zone" id="purchase-request-zone" tabindex="0" role="button" aria-describedby="purchase-request-hint">
+                <input type="file" id="purchase_request_file" name="purchase_request" class="upload-zone__input" accept="image/jpeg,image/png,image/webp,application/pdf" hidden>
+                <input type="file" id="purchase_request_camera" class="upload-zone__input" accept="image/*" capture="environment" hidden>
+                <div class="upload-zone__idle" id="purchase-request-idle">
+                  <p class="upload-zone__title">فایل را اینجا رها کنید</p>
+                  <p class="upload-zone__text" id="purchase-request-hint">یا یکی از گزینه‌های زیر را انتخاب کنید</p>
+                  <div class="upload-zone__actions">
+                    <button type="button" class="btn btn--outline upload-zone__btn" data-upload-action="browse">انتخاب فایل</button>
+                    <button type="button" class="btn btn--outline upload-zone__btn" data-upload-action="camera">عکس با دوربین</button>
+                  </div>
+                </div>
+                <div class="upload-zone__preview" id="purchase-request-preview" hidden>
+                  <img id="purchase-request-thumb" class="upload-zone__thumb" alt="پیش‌نمایش درخواست خرید" hidden>
+                  <div class="upload-zone__filemeta">
+                    <strong id="purchase-request-filename"></strong>
+                    <span id="purchase-request-filesize"></span>
+                  </div>
+                  <button type="button" class="btn btn--ghost upload-zone__remove" data-upload-action="remove">حذف</button>
+                </div>
+              </div>
+              <p class="form-hint">فرمت‌های مجاز: JPG، PNG، WEBP یا PDF — حداکثر ۸ مگابایت</p>
+              <p class="form-error" id="purchase_request-error" hidden></p>
+            </div>
+
             <button type="submit" class="btn btn--primary btn--full" id="contact-submit">ارسال درخواست</button>
           </form>
         </div>
@@ -197,7 +226,7 @@
 
       <aside class="contact-info">
         <h2>راه‌های ارتباطی</h2>
-        <p>برای ثبت‌نام در وبینارها، دریافت اطلاعات محصولات یا همکاری نمایندگی با آکادمی با ما در تماس باشید.</p>
+        <p>برای ثبت‌نام در وبینارها، دریافت اطلاعات محصولات یا ثبت سفارش خرید با ما در تماس باشید.</p>
         <div class="contact-links">
           <a href="mailto:info@k-beauty.academy" class="contact-link">
             <span class="icon">✉️</span>
@@ -267,6 +296,6 @@
   </footer>
 
   <script src="analytics.js?v=1"></script>
-  <script src="main.js?v=11"></script>
+  <script src="main.js?v=14"></script>
 </body>
 </html>

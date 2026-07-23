@@ -1,0 +1,442 @@
+{
+  "name": "k-beauty website Form",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "83a059c5-7260-4956-9d4c-40442611c076",
+        "options": {
+          "binaryPropertyName": "purchase_request"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, 96],
+      "id": "2971d979-44e1-451e-b8b5-c789144fa826",
+      "name": "Webhook",
+      "webhookId": "83a059c5-7260-4956-9d4c-40442611c076"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d86cad95-2bc2-490c-8dd9-74c82bddd023",
+              "leftValue": "={{ $json.body.website || '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [224, 96],
+      "id": "8f6d8d04-8081-4c7c-a1a4-2ecec4c398bf",
+      "name": "If Honeypot Empty"
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "name": "={{ ($binary.purchase_request && $binary.purchase_request.fileName) ? ($('Webhook').item.json.body.phone + '_' + $now.toFormat('yyyyMMdd_HHmmss') + '_' + $binary.purchase_request.fileName) : ($('Webhook').item.json.body.phone + '_purchase_request') }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "REPLACE_WITH_DRIVE_FOLDER_ID"
+        },
+        "options": {
+          "binaryData": true,
+          "binaryPropertyName": "purchase_request"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [448, 0],
+      "id": "a1b2c3d4-drive-upload-001",
+      "name": "Upload to Google Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone",
+            "allowFileDiscovery": false
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [672, 0],
+      "id": "a1b2c3d4-drive-share-001",
+      "name": "Share Drive File",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "prep-1",
+              "name": "purchase_request_file_id",
+              "value": "={{ $('Upload to Google Drive').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "prep-2",
+              "name": "purchase_request_file_name",
+              "value": "={{ $('Upload to Google Drive').item.json.name || ($('Webhook').item.json.binary && $('Webhook').item.json.binary.purchase_request && $('Webhook').item.json.binary.purchase_request.fileName) || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "prep-3",
+              "name": "purchase_request_url",
+              "value": "={{ $('Upload to Google Drive').item.json.webViewLink || ('https://drive.google.com/file/d/' + $('Upload to Google Drive').item.json.id + '/view') }}",
+              "type": "string"
+            },
+            {
+              "id": "prep-4",
+              "name": "purchase_request_preview_url",
+              "value": "={{ 'https://drive.google.com/uc?export=view&id=' + $('Upload to Google Drive').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "prep-5",
+              "name": "products_text",
+              "value": "={{ Array.isArray($('Webhook').item.json.body.products) ? $('Webhook').item.json.body.products.join(', ') : ($('Webhook').item.json.body.products || '') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [896, 0],
+      "id": "a1b2c3d4-set-urls-001",
+      "name": "Prepare File Fields"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "NKPJa247vGn4f5df",
+          "mode": "list",
+          "cachedResultName": "kbeauty-website-leads",
+          "cachedResultUrl": "/projects/b5aZbTLpIJQPOBLU/datatables/NKPJa247vGn4f5df"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "full_name": "={{ $('Webhook').item.json.body.full_name }}",
+            "name": "={{ $('Webhook').item.json.body.name }}",
+            "center_name": "={{ $('Webhook').item.json.body.center_name }}",
+            "city": "={{ $('Webhook').item.json.body.city }}",
+            "email": "={{ $('Webhook').item.json.body.email }}",
+            "email_confirm": "={{ $('Webhook').item.json.body.email_confirm }}",
+            "specialty": "={{ $('Webhook').item.json.body.specialty }}",
+            "specialty_detail": "={{ $('Webhook').item.json.body.specialty_detail }}",
+            "phone": "={{ $('Webhook').item.json.body.phone }}",
+            "products": "={{ $('Prepare File Fields').item.json.products_text }}",
+            "message": "={{ $('Webhook').item.json.body.message }}",
+            "website": "={{ $('Webhook').item.json.body.website }}",
+            "submitted_at": "={{ $('Webhook').item.json.body.submitted_at }}",
+            "utm_source": "={{ $('Webhook').item.json.body.utm_source }}",
+            "utm_medium": "={{ $('Webhook').item.json.body.utm_medium }}",
+            "utm_campaign": "={{ $('Webhook').item.json.body.utm_campaign }}",
+            "utm_content": "={{ $('Webhook').item.json.body.utm_content }}",
+            "utm_landing_page": "={{ $('Webhook').item.json.body.utm_landing_page }}",
+            "utm_captured_at": "={{ $('Webhook').item.json.body.utm_captured_at }}",
+            "submit_page": "={{ $('Webhook').item.json.body.submit_page }}",
+            "referrer": "={{ $('Webhook').item.json.body.referrer }}",
+            "purchase_request_file_name": "={{ $('Prepare File Fields').item.json.purchase_request_file_name }}",
+            "purchase_request_file_id": "={{ $('Prepare File Fields').item.json.purchase_request_file_id }}",
+            "purchase_request_url": "={{ $('Prepare File Fields').item.json.purchase_request_url }}",
+            "purchase_request_preview_url": "={{ $('Prepare File Fields').item.json.purchase_request_preview_url }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "full_name", "displayName": "full_name", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "name", "displayName": "name", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "center_name", "displayName": "center_name", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "city", "displayName": "city", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "email", "displayName": "email", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "email_confirm", "displayName": "email_confirm", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "specialty", "displayName": "specialty", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "specialty_detail", "displayName": "specialty_detail", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "phone", "displayName": "phone", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "products", "displayName": "products", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "message", "displayName": "message", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "website", "displayName": "website", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "submitted_at", "displayName": "submitted_at", "required": false, "defaultMatch": false, "display": true, "type": "dateTime", "readOnly": false, "removed": false },
+            { "id": "utm_source", "displayName": "utm_source", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "utm_medium", "displayName": "utm_medium", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "utm_campaign", "displayName": "utm_campaign", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "utm_content", "displayName": "utm_content", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "utm_landing_page", "displayName": "utm_landing_page", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "utm_captured_at", "displayName": "utm_captured_at", "required": false, "defaultMatch": false, "display": true, "type": "dateTime", "readOnly": false, "removed": false },
+            { "id": "submit_page", "displayName": "submit_page", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "referrer", "displayName": "referrer", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "purchase_request_file_name", "displayName": "purchase_request_file_name", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "purchase_request_file_id", "displayName": "purchase_request_file_id", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "purchase_request_url", "displayName": "purchase_request_url", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false },
+            { "id": "purchase_request_preview_url", "displayName": "purchase_request_preview_url", "required": false, "defaultMatch": false, "display": true, "type": "string", "readOnly": false, "removed": false }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [1120, 0],
+      "id": "5b5f1081-049d-4ab6-9a78-344e0306b4f3",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1dAIe_rPs0G6o9xkoUMZndB8-E-oGsHdXpBh-rRivXBY",
+          "mode": "list",
+          "cachedResultName": "kbeauty-website-leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dAIe_rPs0G6o9xkoUMZndB8-E-oGsHdXpBh-rRivXBY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Contact Form",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dAIe_rPs0G6o9xkoUMZndB8-E-oGsHdXpBh-rRivXBY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "full_name": "={{ $('Webhook').item.json.body.full_name }}",
+            "name": "={{ $('Webhook').item.json.body.name }}",
+            "center_name": "={{ $('Webhook').item.json.body.center_name }}",
+            "city": "={{ $('Webhook').item.json.body.city }}",
+            "email": "={{ $('Webhook').item.json.body.email }}",
+            "email_confirm": "={{ $('Webhook').item.json.body.email_confirm }}",
+            "specialty": "={{ $('Webhook').item.json.body.specialty }}",
+            "specialty_detail": "={{ $('Webhook').item.json.body.specialty_detail }}",
+            "phone": "={{ $('Webhook').item.json.body.phone }}",
+            "products": "={{ $('Prepare File Fields').item.json.products_text }}",
+            "message": "={{ $('Webhook').item.json.body.message }}",
+            "website": "={{ $('Webhook').item.json.body.website }}",
+            "submitted_at": "={{ $('Webhook').item.json.body.submitted_at }}",
+            "utm_source": "={{ $('Webhook').item.json.body.utm_source }}",
+            "utm_medium": "={{ $('Webhook').item.json.body.utm_medium }}",
+            "utm_campaign": "={{ $('Webhook').item.json.body.utm_campaign }}",
+            "utm_content": "={{ $('Webhook').item.json.body.utm_content }}",
+            "utm_landing_page": "={{ $('Webhook').item.json.body.utm_landing_page }}",
+            "utm_captured_at": "={{ $('Webhook').item.json.body.utm_captured_at }}",
+            "submit_page": "={{ $('Webhook').item.json.body.submit_page }}",
+            "referrer": "={{ $('Webhook').item.json.body.referrer }}",
+            "purchase_request_file_name": "={{ $('Prepare File Fields').item.json.purchase_request_file_name }}",
+            "purchase_request_file_id": "={{ $('Prepare File Fields').item.json.purchase_request_file_id }}",
+            "purchase_request_url": "={{ $('Prepare File Fields').item.json.purchase_request_url }}",
+            "purchase_request_preview_url": "={{ $('Prepare File Fields').item.json.purchase_request_preview_url }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "full_name", "displayName": "full_name", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "name", "displayName": "name", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "center_name", "displayName": "center_name", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "city", "displayName": "city", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "email", "displayName": "email", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "email_confirm", "displayName": "email_confirm", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "specialty", "displayName": "specialty", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "specialty_detail", "displayName": "specialty_detail", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "phone", "displayName": "phone", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "products", "displayName": "products", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "message", "displayName": "message", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "website", "displayName": "website", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "submitted_at", "displayName": "submitted_at", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "utm_source", "displayName": "utm_source", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "utm_medium", "displayName": "utm_medium", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "utm_campaign", "displayName": "utm_campaign", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "utm_content", "displayName": "utm_content", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "utm_landing_page", "displayName": "utm_landing_page", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "utm_captured_at", "displayName": "utm_captured_at", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "submit_page", "displayName": "submit_page", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "referrer", "displayName": "referrer", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "purchase_request_file_name", "displayName": "purchase_request_file_name", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "purchase_request_file_id", "displayName": "purchase_request_file_id", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "purchase_request_url", "displayName": "purchase_request_url", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "purchase_request_preview_url", "displayName": "purchase_request_preview_url", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [1344, 0],
+      "id": "c9bc3145-ee67-41fe-b132-eedb9dae34b8",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Mr7ite9jGAkonsWv",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "436773142",
+        "text": "=📩 درخواست خرید محصول جدید\n\n👤 نام: {{ $('Webhook').item.json.body.full_name }}\n🏥 مرکز: {{ $('Webhook').item.json.body.center_name }} | {{ $('Webhook').item.json.body.city }}\n📧 ایمیل: {{ $('Webhook').item.json.body.email }}\n📞 موبایل: {{ $('Webhook').item.json.body.phone }}\n🩺 تخصص: {{ $('Webhook').item.json.body.specialty_detail }}\n\n🛒 محصولات:\n{{ $('Prepare File Fields').item.json.products_text }}\n\n📎 درخواست خرید:\n{{ $('Prepare File Fields').item.json.purchase_request_url }}\n\n📝 پیام:\n{{ $('Webhook').item.json.body.message || 'ندارد' }}\n\n📊 UTM: {{ $('Webhook').item.json.body.utm_source || '-' }} / {{ $('Webhook').item.json.body.utm_campaign || '-' }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1568, 0],
+      "id": "06642d46-9856-4cd6-b797-7caa820c1849",
+      "name": "Send a text message",
+      "webhookId": "f96683c8-a19a-4bfb-911b-f27f13e68ca5",
+      "credentials": {
+        "telegramApi": {
+          "id": "bp5z576vtWgWY1lJ",
+          "name": "nadplus_webinar_bot"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If Honeypot Empty",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Honeypot Empty": {
+      "main": [
+        [
+          {
+            "node": "Upload to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Upload to Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Share Drive File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share Drive File": {
+      "main": [
+        [
+          {
+            "node": "Prepare File Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare File Fields": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "Asia/Dubai",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "purchase-request-drive-v1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a55157a0954f95a04f20b1e0e82243dda61031940e83e11c00d94baf8c58fe50"
+  },
+  "nodeGroups": [],
+  "id": "XvYddVgY4JEujVFK",
+  "tags": []
+}
