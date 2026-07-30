@@ -1,0 +1,1081 @@
+{
+  "name": "Webinar Certificate Generation",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "53dc21d8-4190-45f5-b473-da5e4e18b53c",
+              "leftValue": "={{ $json.Cert_Status }}",
+              "rightValue": "✅ DONE AGF",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1040,
+        2112
+      ],
+      "id": "d056000e-43de-42a4-a7a0-71db3a3de06c",
+      "name": "If6"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.callback_query.from.id }}",
+        "text": "=در حال آماده سازی گواهینامه ... ⏳\nاین فرآیند تا 5 دقیقه طول میکشد",
+        "replyMarkup": "replyKeyboardRemove",
+        "replyKeyboardRemove": {
+          "remove_keyboard": true
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        368,
+        2112
+      ],
+      "id": "42f5acfb-8276-4b09-b6c6-5ec35bd7d26b",
+      "name": "working2",
+      "webhookId": "f73a782f-98af-4c16-97cc-fcb3a4f4e82c",
+      "credentials": {
+        "telegramApi": {
+          "id": "bp5z576vtWgWY1lJ",
+          "name": "nadplus_webinar_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "7ae5a3ec-5c32-4871-aa78-9969e3aeaaf8",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        144,
+        2112
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Start').item.json.callback_query.from.id }}",
+        "text": "=استاد گرامی، شما قبلا گواهینامه خود را دریافت کرده اید. برای ارتباط با پشتیبانی، لطفا مشکل خود را شرح دهید. سپاسگزاریم. 🌻",
+        "replyMarkup": "forceReply",
+        "forceReply": {
+          "force_reply": false
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1264,
+        2208
+      ],
+      "id": "148c442f-9f8e-4f4e-baf5-6a3ca76e9cf6",
+      "name": "Cert Already Sent PN+NAD",
+      "webhookId": "f73a782f-98af-4c16-97cc-fcb3a4f4e82c",
+      "credentials": {
+        "telegramApi": {
+          "id": "bp5z576vtWgWY1lJ",
+          "name": "nadplus_webinar_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $('Start').item.json.callback_query.from.id }}",
+        "binaryData": true,
+        "additionalFields": {
+          "caption": "=🎓 استاد گرامی، جناب آقای / سرکار خانم دکتر {{ $('Get_Cert_data').item.json.Cert_Name }}\n\nنسخه دیجیتال گواهینامه حضور شما در وبینار صادر گردید. از همراهی شما با کی‌بیوتی آکادمی سپاسگزاریم. 🌸"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2832,
+        2016
+      ],
+      "id": "bad6266d-4f7a-4c73-ab03-870d6bd2e27b",
+      "name": "Send a Certificate",
+      "webhookId": "9b8be731-2bfe-4a33-8de7-650dea2c7f92",
+      "credentials": {
+        "telegramApi": {
+          "id": "bp5z576vtWgWY1lJ",
+          "name": "nadplus_webinar_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1pRuzyMehTJ53tCdT4umQlIvR7BaNfN_TSRLEd3Xa7eY",
+          "mode": "list",
+          "cachedResultName": "Webinar_NAD_Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pRuzyMehTJ53tCdT4umQlIvR7BaNfN_TSRLEd3Xa7eY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pRuzyMehTJ53tCdT4umQlIvR7BaNfN_TSRLEd3Xa7eY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Chat_ID": "={{ $('Start').item.json.callback_query.from.id }}",
+            "Cert_Status": "=✅ DONE AGF\nPresentation:\nhttps://docs.google.com/presentation/d/{{ $('Copy Certificate').item.json.id }}/edit\n\nPDF:\nhttps://docs.google.com/presentation/d/{{ $('Copy Certificate').item.json.id }}/export/pdf"
+          },
+          "matchingColumns": [
+            "Chat_ID"
+          ],
+          "schema": [
+            {
+              "id": "Chat_ID",
+              "displayName": "Chat_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Username",
+              "displayName": "Username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Full_Name",
+              "displayName": "Full_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Phone_Number",
+              "displayName": "Phone_Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Medical_Specialty",
+              "displayName": "Medical_Specialty",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Registration_Date",
+              "displayName": "Registration_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Cert_Name",
+              "displayName": "Cert_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Cert_Email",
+              "displayName": "Cert_Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Cert_Status",
+              "displayName": "Cert_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3056,
+        2016
+      ],
+      "id": "9950de98-7e4b-454b-9744-ce0c3bd54872",
+      "name": "Update Certificate",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Mr7ite9jGAkonsWv",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "=436773142",
+        "text": "=✅ تولید گواهینامه وبینار موفق\n\nنام: {{ $('Get_Cert_data').item.json.Cert_Name }}\nتخصص: {{ $('Get_Cert_data').item.json.Medical_Specialty }}\nآیدی تلگرام: @{{ $('Get_Cert_data').item.json.Username }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Google Slides File",
+                    "additionalFields": {
+                      "url": "=https://docs.google.com/presentation/d/{{ $('Copy Certificate').item.json.id }}/edit"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "PDF File",
+                    "additionalFields": {
+                      "url": "=https://docs.google.com/presentation/d/{{ $('Copy Certificate').item.json.id }}/export/pdf"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false,
+          "disable_notification": true,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3280,
+        2016
+      ],
+      "id": "9fb90cf7-60ab-428e-8d36-44dc1d3cd8d1",
+      "name": "Tell Admin",
+      "webhookId": "bbb21760-35e2-4d04-bca6-d0b341ec4169",
+      "credentials": {
+        "telegramApi": {
+          "id": "bp5z576vtWgWY1lJ",
+          "name": "nadplus_webinar_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "lbbbNwstgTsGZt98",
+          "mode": "list",
+          "cachedResultName": "kbeauty-certificates-number",
+          "cachedResultUrl": "/projects/b5aZbTLpIJQPOBLU/datatables/lbbbNwstgTsGZt98"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chatId": "={{ $('Start').item.json.callback_query.from.id }}",
+            "name": "={{ $('Get_Cert_data').item.json.Full_Name }}",
+            "email": "={{ $('Get_Cert_data').item.json.Cert_Email }}",
+            "username": "={{ $('Get_Cert_data').item.json.Username }}",
+            "phoneNumber": "={{ $('Get_Cert_data').item.json.Phone_Number }}",
+            "certNo": "={{ $('Generate Cert Number').item.json.certNumber }}",
+            "webinar": "AGF",
+            "status": "=✅ DONE AGF\nPresentation:\nhttps://docs.google.com/presentation/d/{{ $('Copy Certificate').item.json.id }}/edit\n\nPDF:\nhttps://docs.google.com/presentation/d/{{ $('Copy Certificate').item.json.id }}/export/pdf"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chatId",
+              "displayName": "chatId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "phoneNumber",
+              "displayName": "phoneNumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "certNo",
+              "displayName": "certNo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "webinar",
+              "displayName": "webinar",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "etc",
+              "displayName": "etc",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3504,
+        2016
+      ],
+      "id": "c397ea00-e37d-42eb-94aa-fe6e1e6ff051",
+      "name": "Insert row",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        592,
+        2112
+      ],
+      "id": "1fb59360-640f-44fc-862a-5066453e3e5c",
+      "name": "Wait",
+      "webhookId": "9647e2bb-c516-4bce-a594-3aba3b547965"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1pRuzyMehTJ53tCdT4umQlIvR7BaNfN_TSRLEd3Xa7eY",
+          "mode": "list",
+          "cachedResultName": "Webinar_NAD_Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pRuzyMehTJ53tCdT4umQlIvR7BaNfN_TSRLEd3Xa7eY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pRuzyMehTJ53tCdT4umQlIvR7BaNfN_TSRLEd3Xa7eY/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Chat_ID",
+              "lookupValue": "={{ $('Start').item.json.callback_query.from.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        816,
+        2112
+      ],
+      "id": "805cae8f-bc7f-487f-b8c9-2267be1fe0cd",
+      "name": "Get_Cert_data",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Mr7ite9jGAkonsWv",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "1yye6UOhsBjmPq68luI6op8omPdkicTr4PnIncOXV39c",
+          "mode": "list",
+          "cachedResultName": "PN+NAD Certificate Template",
+          "cachedResultUrl": "https://docs.google.com/presentation/d/1yye6UOhsBjmPq68luI6op8omPdkicTr4PnIncOXV39c/edit?usp=drivesdk"
+        },
+        "name": "=گواهینامه {{ $('Get_Cert_data').item.json.Cert_Name }} {{$now.format('DD hh:mm:ss')}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1264,
+        2016
+      ],
+      "id": "6f4d18bf-a96c-40c8-9431-0c01c08eaebe",
+      "name": "Copy Certificate",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "1gmhbfuAcRuBeK1I",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone",
+            "allowFileDiscovery": true
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1488,
+        2016
+      ],
+      "id": "3f816b21-d024-49e8-9076-adaba6b068a7",
+      "name": "Share Certificate",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "1gmhbfuAcRuBeK1I",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "89fcf5b9-4bd1-4582-97ae-20ed32c4d98c",
+              "name": "=certNumber",
+              "value": "=PN/NAD{{ Math.floor(1000000 + Math.random() * 9000000) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1712,
+        2016
+      ],
+      "id": "86934f55-9f78-4a61-a6d4-1ce0d8a32d36",
+      "name": "Generate Cert Number"
+    },
+    {
+      "parameters": {
+        "operation": "replaceText",
+        "presentationId": "={{ $('Copy Certificate').item.json.id }}",
+        "textUi": {
+          "textValues": [
+            {
+              "pageObjectIds": [
+                "p"
+              ],
+              "text": "number",
+              "replaceText": "={{ $json.certNumber }}"
+            },
+            {
+              "pageObjectIds": [
+                "p"
+              ],
+              "text": "date",
+              "replaceText": "={{$now.format('yyyy-MM-dd')}}"
+            },
+            {
+              "pageObjectIds": [
+                "p"
+              ],
+              "text": "username",
+              "replaceText": "={{ $('Get_Cert_data').item.json.Cert_Name }}"
+            },
+            {
+              "pageObjectIds": [
+                "p"
+              ],
+              "text": "speciality",
+              "replaceText": "={{ $('Get_Cert_data').item.json.Medical_Specialty }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSlides",
+      "typeVersion": 2,
+      "position": [
+        2384,
+        2016
+      ],
+      "id": "a0fdb682-dcb9-41e8-b679-ef7e4419e2d4",
+      "name": "Edit Certificate",
+      "credentials": {
+        "googleSlidesOAuth2Api": {
+          "id": "R4OmwRQFwrP5V0IM",
+          "name": "Google Slides account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.presentationId }}",
+          "mode": "id"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "slidesToFormat": "application/pdf"
+            }
+          },
+          "fileName": "={{ $('Copy Certificate').item.json.name }}.pdf"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2608,
+        2016
+      ],
+      "id": "b236d8b1-d9f4-4b21-a283-2327d24a0d08",
+      "name": "Download Certificate",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "1gmhbfuAcRuBeK1I",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d8a93b7a-1815-46a1-8ea1-9b093f50834f",
+              "name": "certNumber",
+              "value": "={{ $('Generate Cert Number').item.json.certNumber }}",
+              "type": "string"
+            },
+            {
+              "id": "b83a167c-3512-4d2a-a38c-fb6178c29bb4",
+              "name": "verifyUrl",
+              "value": "={{ 'https://k-beauty.academy/verify.html?cert=' + encodeURIComponent($('Generate Cert Number').item.json.certNumber) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1936,
+        2016
+      ],
+      "id": "aea84d5a-37c2-4237-87ae-1c8f4c16f2ac",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "https://api.qrserver.com/v1/create-qr-code/",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "size",
+              "value": "400x400"
+            },
+            {
+              "name": "format",
+              "value": "png"
+            },
+            {
+              "name": "data",
+              "value": "={{ $json.verifyUrl }}"
+            },
+            {
+              "name": "margin",
+              "value": "10"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2160,
+        2016
+      ],
+      "id": "89b3860a-1e46-41ac-ae8a-e71851663376",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {
+    "Start": [
+      {
+        "json": {
+          "ok": true,
+          "result": true,
+          "callback_query": {
+            "id": "1875926364673552682",
+            "from": {
+              "id": 436773142,
+              "is_bot": false,
+              "first_name": "Alec",
+              "last_name": "Asgari",
+              "username": "alecasgari88",
+              "language_code": "en"
+            },
+            "message": {
+              "message_id": 13828,
+              "from": {
+                "id": 8873233749,
+                "is_bot": true,
+                "first_name": "آکادمی کی بیوتی 🇰🇷 K-Beauty",
+                "username": "nadplus_webinar_bot"
+              },
+              "chat": {
+                "id": 436773142,
+                "first_name": "Alec",
+                "last_name": "Asgari",
+                "username": "alecasgari88",
+                "type": "private"
+              },
+              "date": 1782460148,
+              "text": "📋 پیش‌نمایش اطلاعات گواهینامه:\n\n👤 نام: عليرضا فرزام\n📧 آدرس ایمیل: دتتتت\n🩺 تخصص: پوست، مو و زیبایی\n\n\nاستاد گرامی، آیا اطلاعات فوق جهت درج در گواهینامه و ارسال ایمیل مورد تایید است؟",
+              "entities": [
+                {
+                  "offset": 41,
+                  "length": 12,
+                  "type": "bold"
+                },
+                {
+                  "offset": 69,
+                  "length": 5,
+                  "type": "bold"
+                },
+                {
+                  "offset": 84,
+                  "length": 17,
+                  "type": "bold"
+                }
+              ],
+              "reply_markup": {
+                "inline_keyboard": [
+                  [
+                    {
+                      "text": "✅ تایید و صدور گواهینامه",
+                      "callback_data": "cert_pn+nad_confirm"
+                    }
+                  ],
+                  [
+                    {
+                      "text": "✏️ ویرایش اطلاعات",
+                      "callback_data": "cert_edit"
+                    }
+                  ]
+                ]
+              }
+            },
+            "chat_instance": "3206965336911296713",
+            "data": "cert_pn+nad_confirm"
+          },
+          "message": {
+            "message_id": 13828,
+            "from": {
+              "id": 8873233749,
+              "is_bot": true,
+              "first_name": "آکادمی کی بیوتی 🇰🇷 K-Beauty",
+              "username": "nadplus_webinar_bot"
+            },
+            "chat": {
+              "id": 436773142,
+              "first_name": "Alec",
+              "last_name": "Asgari",
+              "username": "alecasgari88",
+              "type": "private"
+            },
+            "date": 1782460148,
+            "text": "📋 پیش‌نمایش اطلاعات گواهینامه:\n\n👤 نام: عليرضا فرزام\n📧 آدرس ایمیل: دتتتت\n🩺 تخصص: پوست، مو و زیبایی\n\n\nاستاد گرامی، آیا اطلاعات فوق جهت درج در گواهینامه و ارسال ایمیل مورد تایید است؟",
+            "entities": [
+              {
+                "offset": 41,
+                "length": 12,
+                "type": "bold"
+              },
+              {
+                "offset": 69,
+                "length": 5,
+                "type": "bold"
+              },
+              {
+                "offset": 84,
+                "length": 17,
+                "type": "bold"
+              }
+            ],
+            "reply_markup": {
+              "inline_keyboard": [
+                [
+                  {
+                    "text": "✅ تایید و صدور گواهینامه",
+                    "callback_data": "cert_pn+nad_confirm"
+                  }
+                ],
+                [
+                  {
+                    "text": "✏️ ویرایش اطلاعات",
+                    "callback_data": "cert_edit"
+                  }
+                ]
+              ]
+            }
+          },
+          "Telegram_Trigger_isExecuted": 436773142
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "If6": {
+      "main": [
+        [
+          {
+            "node": "Copy Certificate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cert Already Sent PN+NAD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "working2": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "working2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a Certificate": {
+      "main": [
+        [
+          {
+            "node": "Update Certificate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Certificate": {
+      "main": [
+        [
+          {
+            "node": "Tell Admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tell Admin": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get_Cert_data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get_Cert_data": {
+      "main": [
+        [
+          {
+            "node": "If6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy Certificate": {
+      "main": [
+        [
+          {
+            "node": "Share Certificate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share Certificate": {
+      "main": [
+        [
+          {
+            "node": "Generate Cert Number",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Cert Number": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Certificate": {
+      "main": [
+        [
+          {
+            "node": "Download Certificate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Certificate": {
+      "main": [
+        [
+          {
+            "node": "Send a Certificate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Certificate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "timezone": "Asia/Dubai",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1
+  },
+  "versionId": "cbe6fcf8-5037-464f-b5d3-a32ccf35eb72",
+  "meta": {
+    "instanceId": "a55157a0954f95a04f20b1e0e82243dda61031940e83e11c00d94baf8c58fe50"
+  },
+  "nodeGroups": [],
+  "id": "0BsnTjy41NZ34qfB",
+  "tags": []
+}

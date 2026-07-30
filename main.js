@@ -9,6 +9,7 @@
   const TELEGRAM_BOT_URL = 'https://t.me/nadplus_webinar_bot';
   const TELEGRAM_CHANNEL_URL = 'https://t.me/kbeauty_academy';
   const CONTACT_WEBHOOK_URL = 'https://n8n.alecasgari.com/webhook/83a059c5-7260-4956-9d4c-40442611c076';
+  const CAREER_WEBHOOK_URL = 'https://n8n.alecasgari.com/webhook/kbeauty-career-sales-person';
   const CERT_LOOKUP_WEBHOOK_URL = 'https://n8n.alecasgari.com/webhook/kbeauty-certificate-lookup';
   const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
 
@@ -24,6 +25,8 @@
     initActiveNav();
     initVerifyForm();
     initContactForm();
+    initCareerForm();
+    initCareerThankYou();
     initProductCatalogDownloads();
     initGrowthFactorTooltips();
     initMobileDock();
@@ -138,6 +141,8 @@
     if (document.querySelector('.mobile-dock')) return;
 
     var page = window.location.pathname.split('/').pop() || 'index.html';
+    var isInCareer = window.location.pathname.indexOf('/career/') !== -1;
+    var basePrefix = isInCareer ? '../../' : '';
     var isVerify = page === 'verify.html';
     var isAcademy = page === 'academy.html';
     var isContact = page === 'contact.html';
@@ -153,15 +158,15 @@
     dock.className = 'mobile-dock';
     dock.setAttribute('aria-label', 'میانبرهای موبایل');
     dock.innerHTML =
-      '<a href="verify.html" class="mobile-dock__item' + (isVerify ? ' mobile-dock__item--active' : '') + '">' +
+      '<a href="' + basePrefix + 'verify.html" class="mobile-dock__item' + (isVerify ? ' mobile-dock__item--active' : '') + '">' +
         '<span class="mobile-dock__icon">' + icons.verify + '</span>' +
         '<span class="mobile-dock__label">استعلام</span>' +
       '</a>' +
-      '<a href="academy.html" class="mobile-dock__item' + (isAcademy ? ' mobile-dock__item--active' : '') + '">' +
+      '<a href="' + basePrefix + 'academy.html" class="mobile-dock__item' + (isAcademy ? ' mobile-dock__item--active' : '') + '">' +
         '<span class="mobile-dock__icon">' + icons.academy + '</span>' +
         '<span class="mobile-dock__label">وبینارها</span>' +
       '</a>' +
-      '<a href="contact.html" class="mobile-dock__item' + (isContact ? ' mobile-dock__item--active' : '') + '">' +
+      '<a href="' + basePrefix + 'contact.html" class="mobile-dock__item' + (isContact ? ' mobile-dock__item--active' : '') + '">' +
         '<span class="mobile-dock__icon">' + icons.contact + '</span>' +
         '<span class="mobile-dock__label">تماس</span>' +
       '</a>' +
@@ -665,6 +670,7 @@
   /* --- Contact Form --- */
   const PERSIAN_TEXT_PATTERN = /[^\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\s\u200c]/g;
   const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const ENGLISH_EMAIL_PATTERN = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
   const IRAN_MOBILE_PATTERN = /^09\d{9}$/;
 
   function normalizeDigits(value) {
@@ -1209,6 +1215,283 @@
     if (success) {
       success.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  }
+
+  /* --- Career Form --- */
+  var CAREER_RESUME_MAX_BYTES = 10 * 1024 * 1024;
+  var CAREER_RESUME_TYPES = {
+    'application/pdf': true,
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': true,
+    'application/msword': true
+  };
+
+  function generateCareerTrackingCode() {
+    var now = new Date();
+    var y = String(now.getFullYear());
+    var m = String(now.getMonth() + 1).padStart(2, '0');
+    var d = String(now.getDate()).padStart(2, '0');
+    var rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+    return 'KB-SLS-' + y + m + d + '-' + rand;
+  }
+
+  function bindCareerPhoneInput(input) {
+    if (!input) return;
+    input.addEventListener('input', function () {
+      var digits = (input.value || '').replace(/[^0-9]/g, '').slice(0, 11);
+      if (digits.length > 0 && digits.charAt(0) !== '0') {
+        digits = '';
+      } else if (digits.length > 1 && digits.charAt(1) !== '9') {
+        digits = digits.slice(0, 1);
+      }
+      input.value = digits;
+    });
+  }
+
+  function bindEnglishEmailInput(input) {
+    if (!input) return;
+    input.addEventListener('input', function () {
+      var sanitized = (input.value || '').replace(/[^\x20-\x7E]/g, '');
+      if (sanitized !== input.value) input.value = sanitized;
+    });
+  }
+
+  function initCareerResumeUpload(form) {
+    var zone = document.getElementById('career-resume-zone');
+    var input = document.getElementById('career_resume');
+    var idle = document.getElementById('career-resume-idle');
+    var preview = document.getElementById('career-resume-preview');
+    var fileNameEl = document.getElementById('career-resume-filename');
+    var fileSizeEl = document.getElementById('career-resume-filesize');
+    var selectedFile = null;
+
+    if (!form || !zone || !input) {
+      return {
+        getFile: function () { return null; },
+        clear: function () {}
+      };
+    }
+
+    function clearFile() {
+      selectedFile = null;
+      input.value = '';
+      if (idle) idle.hidden = false;
+      if (preview) preview.hidden = true;
+      zone.classList.remove('is-invalid');
+      clearFieldError('career-resume-group', 'career_resume-error');
+    }
+
+    function setFile(file) {
+      if (!file) return;
+
+      if (!CAREER_RESUME_TYPES[file.type]) {
+        zone.classList.add('is-invalid');
+        showFieldError('career-resume-group', 'career_resume-error', 'فقط فایل PDF یا Word (DOC/DOCX) مجاز است.');
+        return;
+      }
+      if (file.size > CAREER_RESUME_MAX_BYTES) {
+        zone.classList.add('is-invalid');
+        showFieldError('career-resume-group', 'career_resume-error', 'حجم رزومه نباید بیشتر از ۱۰ مگابایت باشد.');
+        return;
+      }
+
+      selectedFile = file;
+      zone.classList.remove('is-invalid');
+      clearFieldError('career-resume-group', 'career_resume-error');
+      if (fileNameEl) fileNameEl.textContent = file.name;
+      if (fileSizeEl) fileSizeEl.textContent = formatFileSize(file.size);
+      if (idle) idle.hidden = true;
+      if (preview) preview.hidden = false;
+    }
+
+    zone.addEventListener('click', function (e) {
+      var actionBtn = e.target.closest('[data-career-upload-action]');
+      if (!actionBtn) return;
+      var action = actionBtn.getAttribute('data-career-upload-action');
+      if (action === 'browse') input.click();
+      if (action === 'remove') clearFile();
+    });
+
+    zone.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        input.click();
+      }
+    });
+
+    ['dragenter', 'dragover'].forEach(function (name) {
+      zone.addEventListener(name, function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.classList.add('is-dragover');
+      });
+    });
+    ['dragleave', 'drop'].forEach(function (name) {
+      zone.addEventListener(name, function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.classList.remove('is-dragover');
+      });
+    });
+    zone.addEventListener('drop', function (e) {
+      var files = e.dataTransfer && e.dataTransfer.files;
+      if (files && files[0]) setFile(files[0]);
+    });
+    input.addEventListener('change', function () {
+      if (input.files && input.files[0]) setFile(input.files[0]);
+    });
+
+    return {
+      getFile: function () { return selectedFile; },
+      clear: clearFile
+    };
+  }
+
+  function initCareerForm() {
+    var form = document.getElementById('career-form');
+    if (!form) return;
+
+    var submitBtn = document.getElementById('career-submit');
+    var phoneInput = form.querySelector('[name="phone"]');
+    var ageInput = form.querySelector('[name="age"]');
+    var emailInput = form.querySelector('[name="email"]');
+    var noteInput = form.querySelector('[name="about"]');
+    var noteCount = document.getElementById('career-about-count');
+    var formError = document.getElementById('career-form-error');
+    var resumeUpload = initCareerResumeUpload(form);
+
+    bindPersianInput(form.querySelector('[name="first_name"]'), 80);
+    bindPersianInput(form.querySelector('[name="last_name"]'), 80);
+    bindPersianInput(form.querySelector('[name="city"]'), 80);
+    bindPersianInput(form.querySelector('[name="province"]'), 80);
+    bindCareerPhoneInput(phoneInput);
+    bindEnglishEmailInput(emailInput);
+
+    function setFormError(message) {
+      if (!formError) return;
+      formError.textContent = message || '';
+      formError.hidden = !message;
+    }
+
+    if (noteInput && noteCount) {
+      noteInput.addEventListener('input', function () {
+        if (noteInput.value.length > 300) noteInput.value = noteInput.value.slice(0, 300);
+        noteCount.textContent = String(noteInput.value.length);
+      });
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      setFormError('');
+      form.querySelectorAll('.form-group.is-invalid').forEach(function (el) {
+        el.classList.remove('is-invalid');
+      });
+      form.querySelectorAll('.form-error').forEach(function (el) {
+        el.hidden = true;
+        el.textContent = '';
+      });
+      var resumeZone = document.getElementById('career-resume-zone');
+      if (resumeZone) resumeZone.classList.remove('is-invalid');
+
+      var firstName = sanitizePersianText((form.querySelector('[name="first_name"]').value || '').trim(), 80);
+      var lastName = sanitizePersianText((form.querySelector('[name="last_name"]').value || '').trim(), 80);
+      var phone = (phoneInput.value || '').replace(/[^0-9]/g, '');
+      var email = (emailInput.value || '').trim();
+      var city = sanitizePersianText((form.querySelector('[name="city"]').value || '').trim(), 80);
+      var province = sanitizePersianText((form.querySelector('[name="province"]').value || '').trim(), 80);
+      var age = Number((ageInput.value || '').trim());
+      var gender = form.querySelector('[name="gender"]').value;
+      var employmentType = form.querySelector('[name="employment_type"]').value;
+      var experienceYears = (form.querySelector('[name="experience_years"]').value || '').trim();
+      var about = (noteInput.value || '').trim().slice(0, 300);
+      var honeypot = (form.querySelector('[name="website"]') || {}).value || '';
+      var resumeFile = resumeUpload.getFile();
+      var hasError = false;
+
+      if (honeypot.trim()) return;
+
+      if (!firstName) { showFieldError('career-first-name-group', 'career_first_name-error', 'نام را وارد کنید.'); hasError = true; }
+      if (!lastName) { showFieldError('career-last-name-group', 'career_last_name-error', 'نام خانوادگی را وارد کنید.'); hasError = true; }
+      if (!/^09\d{9}$/.test(phone)) { showFieldError('career-phone-group', 'career_phone-error', 'شماره باید انگلیسی، ۱۱ رقم و با 09 شروع شود.'); hasError = true; }
+      if (!isValidEmail(email) || !ENGLISH_EMAIL_PATTERN.test(email)) { showFieldError('career-email-group', 'career_email-error', 'ایمیل باید فقط با حروف و کاراکترهای انگلیسی وارد شود.'); hasError = true; }
+      if (!city) { showFieldError('career-city-group', 'career_city-error', 'شهر را وارد کنید.'); hasError = true; }
+      if (!province) { showFieldError('career-province-group', 'career_province-error', 'استان/منطقه را وارد کنید.'); hasError = true; }
+      if (!Number.isInteger(age) || age < 18 || age > 60) { showFieldError('career-age-group', 'career_age-error', 'سن باید بین ۱۸ تا ۶۰ باشد.'); hasError = true; }
+      if (!gender) { showFieldError('career-gender-group', 'career_gender-error', 'جنسیت را انتخاب کنید.'); hasError = true; }
+      if (!employmentType) { showFieldError('career-employment-type-group', 'career_employment_type-error', 'نوع همکاری را انتخاب کنید.'); hasError = true; }
+      if (!resumeFile) {
+        showFieldError('career-resume-group', 'career_resume-error', 'بارگذاری رزومه الزامی است.');
+        if (resumeZone) resumeZone.classList.add('is-invalid');
+        hasError = true;
+      }
+
+      if (hasError) {
+        setFormError('لطفاً خطاهای فرم را بررسی و اصلاح کنید.');
+        return;
+      }
+
+      var trackingCode = generateCareerTrackingCode();
+      var phoneIntl = '+98' + phone.slice(1);
+      var utm = getUtmParams();
+
+      var formData = new FormData();
+      formData.append('job_slug', 'sales-person');
+      formData.append('tracking_code', trackingCode);
+      formData.append('first_name', firstName);
+      formData.append('last_name', lastName);
+      formData.append('full_name', firstName + ' ' + lastName);
+      formData.append('phone', phoneIntl);
+      formData.append('phone_local', phone);
+      formData.append('email', email);
+      formData.append('age', String(age));
+      formData.append('gender', gender);
+      formData.append('city', city);
+      formData.append('province', province);
+      formData.append('employment_type', employmentType);
+      formData.append('experience_years', experienceYears);
+      formData.append('about', about);
+      formData.append('website', honeypot.trim());
+      formData.append('submitted_at', new Date().toISOString());
+      formData.append('resume', resumeFile, resumeFile.name);
+      Object.keys(utm).forEach(function (key) {
+        if (utm[key] != null && utm[key] !== '') formData.append(key, utm[key]);
+      });
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'در حال ارسال...';
+      }
+
+      fetch(CAREER_WEBHOOK_URL, {
+        method: 'POST',
+        body: formData
+      })
+        .then(function (response) {
+          if (!response.ok) throw new Error('request_failed');
+          var target = '/career/thank-you/?name=' + encodeURIComponent(firstName + ' ' + lastName) +
+            '&code=' + encodeURIComponent(trackingCode) +
+            '&job=' + encodeURIComponent('sales-person');
+          window.location.href = target;
+        })
+        .catch(function () {
+          showToast('ارسال فرم با خطا مواجه شد. لطفاً دوباره تلاش کنید.', false);
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'ارسال رزومه';
+          }
+        });
+    });
+  }
+
+  function initCareerThankYou() {
+    var wrap = document.getElementById('career-thankyou');
+    if (!wrap) return;
+    var params = new URLSearchParams(window.location.search);
+    var name = params.get('name') || 'کاربر گرامی';
+    var code = params.get('code') || '—';
+    var nameEl = document.getElementById('career-thankyou-name');
+    var codeEl = document.getElementById('career-thankyou-code');
+    if (nameEl) nameEl.textContent = name;
+    if (codeEl) codeEl.textContent = code;
   }
 
   /* --- Toast Notification --- */
